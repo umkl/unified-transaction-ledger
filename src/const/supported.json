@@ -1,0 +1,13 @@
+[
+  {
+    "id": "RAIFFEISEN_AT_RZBAATWW",
+    "name": "Raiffeisen Bank",
+    "bic": "RZBAATWW",
+    "transaction_total_days": "730",
+    "countries": [
+      "AT"
+    ],
+    "logo": "https://cdn-logos.gocardless.com/ais/RAIFFEISEN_RZBCCZPP.png",
+    "max_access_valid_for_days": "180"
+  }
+]

@@ -1,0 +1,89 @@
+import fs from "fs/promises";
+export class TransactionFile {
+  private transactions: Transaction[] = [];
+
+  private constructor(transactions: Transaction[] = []) {
+    this.transactions = transactions.map((t: any) => ({
+      id: t.id,
+      amount: t.amount,
+      date: new Date(t.date),
+      description: t.description,
+      recipient: t.recipient,
+    }));
+  }
+
+  public static async create(institutionIds?: string[]) {
+    const bankIds = institutionIds ?? ["cash"];
+    const readTransactions: any[] = [];
+    for (const bankId of bankIds) {
+      const filePath = process.cwd() + `/cache/transactions-${bankId}.json`;
+      const rawTransactions = await fs.readFile(filePath, {
+        encoding: "utf-8",
+      });
+      const jsonTransactions: any[] = JSON.parse(rawTransactions);
+      jsonTransactions.map((x) => readTransactions.push(x));
+    }
+    return new TransactionFile(readTransactions);
+  }
+
+  addTransaction(transaction: Transaction) {
+    this.transactions.push(transaction);
+  }
+
+  getTransactions(): Transaction[] {
+    return this.transactions;
+  }
+
+  async persist() {
+    const grouped = this.transactions.reduce((acc, transaction) => {
+      const institution = transaction.institution || "cash";
+      if (!acc[institution]) {
+        acc[institution] = [];
+      }
+      delete transaction.institution;
+      acc[institution].push(transaction);
+      return acc;
+    }, {} as Record<string, Transaction[]>);
+
+    for (const [key, value] of Object.entries(grouped)) {
+      const serialized = JSON.stringify(value, null, 2);
+      const filePath = process.cwd() + `/cache/transactions-${key}.json`;
+      await fs.writeFile(filePath, serialized);
+    }
+  }
+
+  async fetchTransactionsForInstitution(
+    institutionId: string,
+    accountId?: string
+  ): Promise<void> {
+    // const transactions = await listTransactionsRequest(
+    //   process.env.ACCESS,
+    //   accounts[0]
+    // );
+
+    // For debugging purposes only:
+    const data = await fs.readFile(
+      process.cwd() + `/cache/response-${institutionId}.json`,
+      { encoding: "utf-8" }
+    );
+
+    const transactions = JSON.parse(data);
+
+    const booked = transactions.transactions.booked;
+
+    const transactionsMapped = booked.map((tx: any): Transaction => {
+      return {
+        id: tx.transactionId,
+        amount: tx.transactionAmount.amount,
+        date: tx.bookingDate,
+        description: tx.creditorName,
+        recipient: tx.creditorName,
+        institution: institutionId,
+      };
+    });
+
+    for (const tx of transactionsMapped as any[]) {
+      this.addTransaction(tx);
+    }
+  }
+}

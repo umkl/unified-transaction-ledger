@@ -1,0 +1,6 @@
+/.env*
+!.envrc
+/node_modules
+archive
+cache/
+dist/
