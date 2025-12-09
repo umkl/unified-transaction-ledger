@@ -1,5 +1,8 @@
 import fs from "fs/promises";
 import { listTransactionsRequest } from "./requests/account-transactions";
+import { log } from "./utils";
+import { confirm } from "@inquirer/prompts";
+
 export class TransactionsCacheDocuments {
   private transactions: Transaction[] = [];
 
@@ -57,10 +60,21 @@ export class TransactionsCacheDocuments {
     institutionId: string,
     accountId: string
   ): Promise<void> {
-    const data = await listTransactionsRequest(
-      process.env.ACCESS,
-      accountId
-    );
+    const cachePath = `${process.cwd()}/cache/response-${accountId}-${institutionId}.json`;
+
+    let data: any;
+    try {
+      data = await fs.readFile(cachePath, { encoding: "utf8" });
+      const fetchRegardless = await confirm({
+        message: "Cache data loaded, do you want to fetch regardless?",
+      });
+      if (fetchRegardless) {
+        throw new Error("Fetching regardless of cache");
+      }
+    } catch (err: Error | any) {
+      log("Proceeding to fetch from API:", err);
+      data = await listTransactionsRequest(process.env.ACCESS, accountId);
+    }
 
     // For debugging purposes only:
     // const data = await fs.readFile(

@@ -1,4 +1,5 @@
 import { https } from "follow-redirects";
+import { log } from "node:console";
 import fs from "node:fs";
 
 const options = {
@@ -16,12 +17,14 @@ export async function listTransactionsRequest(
   accessToken: string,
   accountId: string
 ): Promise<any> {
-  return await new Promise((resolve, reject) => {
+  return await new Promise(async (resolve, reject) => {
+
     options.headers.Authorization = `Bearer ${accessToken}`;
     options.path = `/api/v2/accounts/${accountId}/transactions/?date_from=2025-09-05&date_to=2025-12-04`;
 
     const req = https.request(options, function (res) {
       const chunks: any = [];
+
 
       res.on("data", function (chunk) {
         chunks.push(chunk);
