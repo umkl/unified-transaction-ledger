@@ -3,19 +3,6 @@ import { rl } from "./infra";
 import receiveRefreshToken from "./requests/token-new";
 import fs from "fs";
 import { log } from "./utils";
-import { promptCountry } from "./country";
-import { refreshToken } from "./refreshToken";
-import { checkbox, confirm } from "@inquirer/prompts";
-import { getInstitutions } from "./requests/institutions";
-import getSupportedInstitutions from "./supported";
-import { createRequisition } from "./requests/requisition";
-import open from "open";
-import { http } from "follow-redirects";
-import { listAccounts } from "./requests/list-accounts";
-import { listTransactionsRequest as listTransactionsRequest } from "./requests/account-transactions";
-import { RequisitionsCacheDocument } from "./RequisitionFile";
-import { TransactionsCacheDocuments } from "./transactionFile";
-import retrieveTransactionsFromTradeRepublic from "./tradeRepublic";
 
 
 
