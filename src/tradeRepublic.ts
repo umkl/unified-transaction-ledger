@@ -1,3 +1,3 @@
-export default async function getTradeRepublicTransactions() {
+export default async function retrieveTransactionsFromTradeRepublic() {
   throw new Error("Trade Republic integration is not implemented yet.");
 }

@@ -15,7 +15,7 @@ const options = {
 export async function listTransactionsRequest(
   accessToken: string,
   accountId: string
-): Promise<any[]> {
+): Promise<any> {
   return await new Promise((resolve, reject) => {
     options.headers.Authorization = `Bearer ${accessToken}`;
     options.path = `/api/v2/accounts/${accountId}/transactions/?date_from=2025-09-05&date_to=2025-12-04`;

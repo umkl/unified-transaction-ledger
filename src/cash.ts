@@ -2,7 +2,7 @@ import { input } from "@inquirer/prompts";
 
 import crypto from "crypto";
 import datePrompt from "date-prompt";
-import { TransactionFile } from "./transactionFile";
+import { TransactionsCacheDocuments } from "./transactionFile";
 import fs from "fs/promises";
 
 export default async function cashAction() {
@@ -38,7 +38,7 @@ export default async function cashAction() {
     recipient: recipient,
   };
 
-  const transactionFile = await TransactionFile.create();
+  const transactionFile = await TransactionsCacheDocuments.create();
   transactionFile.addTransaction(transaction);
   transactionFile.persist();
 }

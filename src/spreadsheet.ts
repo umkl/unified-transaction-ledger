@@ -1,12 +1,12 @@
 import { log } from "console";
-import { TransactionFile } from "./transactionFile";
+import { TransactionsCacheDocuments } from "./transactionFile";
 import { Command } from "commander";
 import { rl } from "./infra";
 const fs = require("fs").promises;
 const path = require("path");
 
 export default async function spreadsheetAction() {
-  const transactionFile = await TransactionFile.create([
+  const transactionFile = await TransactionsCacheDocuments.create([
     "RAIFFEISEN_AT_RZBAATWW",
   ]);
 

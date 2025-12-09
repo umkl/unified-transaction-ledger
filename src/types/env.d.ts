@@ -11,7 +11,3 @@ declare namespace NodeJS {
     env: ProcessEnv;
   }
 }
-
-declare module "date-prompt";
-
-// declare module "node:readline/promises" {}

@@ -1,5 +1,6 @@
 import fs from "fs/promises";
-export class TransactionFile {
+import { listTransactionsRequest } from "./requests/account-transactions";
+export class TransactionsCacheDocuments {
   private transactions: Transaction[] = [];
 
   private constructor(transactions: Transaction[] = []) {
@@ -23,7 +24,7 @@ export class TransactionFile {
       const jsonTransactions: any[] = JSON.parse(rawTransactions);
       jsonTransactions.map((x) => readTransactions.push(x));
     }
-    return new TransactionFile(readTransactions);
+    return new TransactionsCacheDocuments(readTransactions);
   }
 
   addTransaction(transaction: Transaction) {
@@ -54,23 +55,20 @@ export class TransactionFile {
 
   async fetchTransactionsForInstitution(
     institutionId: string,
-    accountId?: string
+    accountId: string
   ): Promise<void> {
-    // const transactions = await listTransactionsRequest(
-    //   process.env.ACCESS,
-    //   accounts[0]
-    // );
-
-    // For debugging purposes only:
-    const data = await fs.readFile(
-      process.cwd() + `/cache/response-${institutionId}.json`,
-      { encoding: "utf-8" }
+    const data = await listTransactionsRequest(
+      process.env.ACCESS,
+      accountId
     );
 
+    // For debugging purposes only:
+    // const data = await fs.readFile(
+    //   process.cwd() + `/cache/response-${institutionId}.json`,
+    //   { encoding: "utf-8" }
+    // );
     const transactions = JSON.parse(data);
-
     const booked = transactions.transactions.booked;
-
     const transactionsMapped = booked.map((tx: any): Transaction => {
       return {
         id: tx.transactionId,

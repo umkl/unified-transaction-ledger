@@ -1,7 +1,8 @@
 import fs from "fs";
 
-export default function getSupportedInstitutions(country: string): any {
-  const result = new Promise<string[]>((resolve, reject) => {
+
+export default async function getSupportedInstitutions(countryCode: string): Promise<SupportedInstitution[]> {
+  const result = await new Promise<SupportedInstitution[]>((resolve, reject) => {
     fs.readFile(
       `${process.cwd()}/src/const/supported.json`,
       { encoding: "utf-8" },
@@ -11,5 +12,5 @@ export default function getSupportedInstitutions(country: string): any {
       }
     );
   });
-  return result;
+  return result.filter((inst) => inst.countries.includes(countryCode));
 }

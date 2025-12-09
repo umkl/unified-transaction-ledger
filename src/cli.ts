@@ -3,10 +3,11 @@
 import { program } from "commander";
 import { version } from "../package.json";
 
-import { setupAction } from "./setup";
+import { setupAction } from "./setupAction";
 import { excelAction } from "./excel";
 import cashAction from "./cash";
 import spreadsheetAction from "./spreadsheet";
+import pullAction from "./pullAction";
 
 program
   .name("utl")
@@ -15,8 +16,13 @@ program
 
 program
   .command("setup")
-  .description("Setup your API for accessing the Nordigen API.")
+  .description("Setup the necessary tokens for accessing the Nordigen API.")
   .action(setupAction);
+
+program
+  .command("pull")
+  .description("Retrieve data from the Nordigen API.")
+  .action(pullAction);
 
 program
   .command("cash")
