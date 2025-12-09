@@ -17,7 +17,9 @@ program
 program
   .command("setup")
   .description("Setup the necessary tokens for accessing the Nordigen API.")
+  .option("-r, --refresh", "Refresh the existing access token.")
   .action(setupAction);
+
 
 program
   .command("pull")

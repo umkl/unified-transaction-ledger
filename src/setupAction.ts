@@ -3,10 +3,9 @@ import { rl } from "./infra";
 import receiveRefreshToken from "./requests/token-new";
 import fs from "fs";
 import { log } from "./utils";
+import { refreshToken } from "./refreshToken";
 
-
-
-export async function setupAction(this: Command): Promise<void> {
+export async function setupAction(options: {refresh: boolean}): Promise<void> {
   const doesEnvExist = await new Promise<boolean>((resolve) => {
     fs.access(process.cwd() + "/.env", fs.constants.F_OK, (err) => {
       resolve(!err);
@@ -37,6 +36,10 @@ export async function setupAction(this: Command): Promise<void> {
 
   if (!process.env.ACCESS || !process.env.REFRESH) {
     await requestNewTokenPair(process.env.SECRET_ID, process.env.SECRET_KEY);
+  }
+
+  if(options.refresh) {
+    await refreshToken(process.env.REFRESH);
   }
 
   const hasChanged =
