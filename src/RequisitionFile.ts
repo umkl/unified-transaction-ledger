@@ -15,14 +15,16 @@ export class RequisitionsCacheDocument {
     const filePath = process.cwd() + "/cache/requisitions.json";
     const rawTransactions = await fs.readFile(filePath, { encoding: "utf-8" });
     const jsonTransactions = JSON.parse(rawTransactions);
-    return new RequisitionsCacheDocument(new Map(Object.entries(jsonTransactions)));
+    return new RequisitionsCacheDocument(
+      new Map(Object.entries(jsonTransactions))
+    );
   }
 
   async getRequisitionId(insti: string) {
     if (this.requisitions.has(insti)) {
       return this.requisitions.get(insti)["id"];
     }
-    
+
     // if the requisition doesn't already exist, create a new one
 
     const requisitionForInstitution: any = await createRequisition(
@@ -66,5 +68,6 @@ export class RequisitionsCacheDocument {
     );
     const filePath = process.cwd() + "/cache/requisitions.json";
     await fs.writeFile(filePath, serialized);
+    log(`Requisitions persisted to ${filePath}`);
   }
 }

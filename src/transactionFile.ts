@@ -53,6 +53,7 @@ export class TransactionsCacheDocuments {
       const serialized = JSON.stringify(value, null, 2);
       const filePath = process.cwd() + `/cache/transactions-${key}.json`;
       await fs.writeFile(filePath, serialized);
+      log(`Transactions for ${key} persisted to ${filePath}`);
     }
   }
 
