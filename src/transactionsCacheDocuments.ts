@@ -37,6 +37,7 @@ export class TransactionsCacheDocuments {
   }
 
   getTransactions(year?: number, month?: number): Transaction[] {
+    console.log(this.transactions.length);
     return this.transactions.filter((t) => {
       const tDate = new Date(t.date);
       const matchesYear = year === undefined || tDate.getFullYear() === year;

@@ -5,11 +5,13 @@ import { rl } from "./infra";
 import { input } from "@inquirer/prompts";
 const fs = require("fs").promises;
 const path = require("path");
+import supported from "./const/supported.json";
 
 export default async function spreadsheetAction() {
-  const transactionFile = await TransactionsCacheDocuments.create([
-    "RAIFFEISEN_AT_RZBAATWW",
-  ]);
+  const institutionIds = supported.map((inst) => inst.id);
+  const transactionFile = await TransactionsCacheDocuments.create(
+    institutionIds
+  );
 
   log("Create Spreadsheet with the Data");
   const yearInput = await input({

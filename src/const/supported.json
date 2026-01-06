@@ -10,7 +10,7 @@
     "logo": "https://cdn-logos.gocardless.com/ais/RAIFFEISEN_RZBCCZPP.png",
     "max_access_valid_for_days": "180"
   },
-    {
+  {
       "id": "REVOLUT_REVOLT21",
       "name": "Revolut",
       "bic": "REVOLT21XXX",
