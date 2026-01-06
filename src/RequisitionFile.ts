@@ -4,6 +4,7 @@ import http from "node:http";
 import { createRequisition } from "./requests/requisition";
 import { log } from "./utils";
 import { confirm } from "@inquirer/prompts";
+import open from "open";
 
 // interface for interacting with requisition cache
 export class RequisitionsCacheDocument {
@@ -63,6 +64,8 @@ export class RequisitionsCacheDocument {
 
     log(`Successfully verified ${insti} with requisition: ${reqId}`);
     this.setRequisition(insti, requisitionForInstitution);
+    this.persist();
+    return reqId;
   }
 
   setRequisition(institutionId: any, requisiton: any) {

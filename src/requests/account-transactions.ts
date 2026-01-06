@@ -36,16 +36,18 @@ export async function listTransactionsRequest(
       res.on("end", function () {
         try {
           const bodyData = Buffer.concat(chunks).toString("utf-8");
-          console.log("Response Body:");
-          console.log(bodyData);
+
           const json = JSON.parse(bodyData);
           if (json["status_code"] >= 400) {
             reject(new Error(`Error response: ${bodyData}`));
           }
+          const date = new Date();
           new Promise<void>((writeResolve) => {
             try {
               fs.writeFile(
-                `${process.cwd()}/cache/response-${accountId}-${institutionId}.json`,
+                `${process.cwd()}/cache/response-${accountId}-${institutionId}-${
+                  date.toISOString().split("T")[0]
+                }.json`,
                 JSON.stringify(json, null, 2),
                 () => {
                   writeResolve();

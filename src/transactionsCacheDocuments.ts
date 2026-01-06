@@ -2,6 +2,7 @@ import fs from "fs/promises";
 import { listTransactionsRequest } from "./requests/account-transactions";
 import { log } from "./utils";
 import { confirm } from "@inquirer/prompts";
+import path from "path";
 
 export class TransactionsCacheDocuments {
   private transactions: Transaction[] = [];
@@ -68,32 +69,50 @@ export class TransactionsCacheDocuments {
     institutionId: string,
     accountId: string
   ): Promise<void> {
-    const cachePath = `${process.cwd()}/cache/response-${accountId}-${institutionId}.json`;
+    const cacheDir = path.join(process.cwd(), "cache");
+    const prefix = `response-${accountId}-${institutionId}-`;
 
-    // let data: any;
-    // try {
-    //   data = await fs.readFile(cachePath, { encoding: "utf8" });
-    //   const fetchRegardless = await confirm({
-    //     message: "Cache data loaded, do you want to fetch regardless?",
-    //   });
-    //   if (fetchRegardless) {
-    //     throw new Error("Fetching regardless of cache");
-    //   }
-    // } catch (err: Error | any) {
-    //   log("Proceeding to fetch from API...");
-    //   data = await listTransactionsRequest(
-    //     process.env.ACCESS,
-    //     accountId,
-    //     institutionId
-    //   );
-    // }
-    // console.log(data);
+    let data: any;
+    try {
+      const files = await fs.readdir(cacheDir);
+      const matchingFiles = files.filter(
+        (f) => f.startsWith(prefix) && f.endsWith(".json")
+      );
+      if (matchingFiles.length === 0) {
+        throw new Error("No cached response files found");
+      }
+      matchingFiles.sort((a, b) => {
+        const dateA = a.slice(prefix.length, prefix.length + 10);
+        const dateB = b.slice(prefix.length, prefix.length + 10);
+        return dateA.localeCompare(dateB);
+      });
+
+      const latestFile = matchingFiles[matchingFiles.length - 1];
+      const cachePath = path.join(cacheDir, latestFile);
+
+      data = await fs.readFile(cachePath, "utf8");
+
+      const fetchRegardless = await confirm({
+        message:
+          "There is a cached response - do you want to create a new fetch (only 4 per day)?",
+      });
+      if (fetchRegardless) {
+        throw new Error("Fetching regardless of cache");
+      }
+    } catch (err: Error | any) {
+      log("Proceeding to fetch from API...");
+      data = await listTransactionsRequest(
+        process.env.ACCESS,
+        accountId,
+        institutionId
+      );
+    }
     // For debugging purposes only:
-    const data = await fs.readFile(
-      process.cwd() + `/cache/response-${institutionId}.json`,
-      { encoding: "utf-8" }
-    );
-    const transactions = JSON.parse(data);
+    // const data = await fs.readFile(
+    //   process.cwd() + `/cache/response-${institutionId}.json`,
+    //   { encoding: "utf-8" }
+    // );
+    const transactions = data;
     const booked = transactions.transactions.booked;
     const transactionsMapped = booked.map((tx: any): Transaction => {
       return {
