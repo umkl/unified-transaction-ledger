@@ -4,3 +4,4 @@
 cache/
 dist/
 out/
+.DS_Store
