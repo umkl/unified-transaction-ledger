@@ -24,6 +24,7 @@ export class TransactionsCacheDocuments {
       const rawTransactions = await fs.readFile(filePath, {
         encoding: "utf-8",
       });
+      console.log(`Loaded transactions from ${filePath}`);
       const jsonTransactions: any[] = JSON.parse(rawTransactions);
       jsonTransactions.map((x) => readTransactions.push(x));
     }
@@ -34,8 +35,14 @@ export class TransactionsCacheDocuments {
     this.transactions.push(transaction);
   }
 
-  getTransactions(): Transaction[] {
-    return this.transactions;
+  getTransactions(year?: number, month?: number): Transaction[] {
+    return this.transactions.filter((t) => {
+      const tDate = new Date(t.date);
+      const matchesYear = year === undefined || tDate.getFullYear() === year;
+      const matchesMonth =
+        month === undefined || tDate.getMonth() + 1 === month;
+      return matchesYear && matchesMonth;
+    });
   }
 
   async persist() {
@@ -63,25 +70,29 @@ export class TransactionsCacheDocuments {
   ): Promise<void> {
     const cachePath = `${process.cwd()}/cache/response-${accountId}-${institutionId}.json`;
 
-    let data: any;
-    try {
-      data = await fs.readFile(cachePath, { encoding: "utf8" });
-      const fetchRegardless = await confirm({
-        message: "Cache data loaded, do you want to fetch regardless?",
-      });
-      if (fetchRegardless) {
-        throw new Error("Fetching regardless of cache");
-      }
-    } catch (err: Error | any) {
-      log("Proceeding to fetch from API:", err);
-      data = await listTransactionsRequest(process.env.ACCESS, accountId);
-    }
-
+    // let data: any;
+    // try {
+    //   data = await fs.readFile(cachePath, { encoding: "utf8" });
+    //   const fetchRegardless = await confirm({
+    //     message: "Cache data loaded, do you want to fetch regardless?",
+    //   });
+    //   if (fetchRegardless) {
+    //     throw new Error("Fetching regardless of cache");
+    //   }
+    // } catch (err: Error | any) {
+    //   log("Proceeding to fetch from API...");
+    //   data = await listTransactionsRequest(
+    //     process.env.ACCESS,
+    //     accountId,
+    //     institutionId
+    //   );
+    // }
+    // console.log(data);
     // For debugging purposes only:
-    // const data = await fs.readFile(
-    //   process.cwd() + `/cache/response-${institutionId}.json`,
-    //   { encoding: "utf-8" }
-    // );
+    const data = await fs.readFile(
+      process.cwd() + `/cache/response-${institutionId}.json`,
+      { encoding: "utf-8" }
+    );
     const transactions = JSON.parse(data);
     const booked = transactions.transactions.booked;
     const transactionsMapped = booked.map((tx: any): Transaction => {

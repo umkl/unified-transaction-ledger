@@ -2,12 +2,12 @@ import { checkbox } from "@inquirer/prompts";
 import { promptCountry } from "./country";
 import getSupportedInstitutions from "./supported";
 import { RequisitionsCacheDocument } from "./RequisitionFile";
-import { TransactionsCacheDocuments } from "./transactionFile";
+import { TransactionsCacheDocuments } from "./transactionsCacheDocuments";
 import { log } from "./utils";
 import retrieveTransactionsFromTradeRepublic from "./tradeRepublic";
 import { listAccounts } from "./requests/list-accounts";
 
-export default async function pullTransactionsIntoCache() {
+export async function pullTransactionsIntoCache() {
   const countryCode = await promptCountry();
 
   const institutions = await getSupportedInstitutions(countryCode);
@@ -35,12 +35,17 @@ export default async function pullTransactionsIntoCache() {
       process.env.ACCESS,
       await allRequisitions.getRequisitionId(insti)
     );
+
+    console.log(`Found ${accounts.length} accounts for institution ${insti}.`);
+
     await transactionsCached.fetchTransactionsForInstitution(
       insti,
       accounts[0]
     );
   }
+
   log("All done!");
+
   await allRequisitions.persist();
   await transactionsCached.persist();
 }

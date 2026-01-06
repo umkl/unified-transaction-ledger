@@ -3,6 +3,7 @@ import http from "node:http";
 
 import { createRequisition } from "./requests/requisition";
 import { log } from "./utils";
+import { confirm } from "@inquirer/prompts";
 
 // interface for interacting with requisition cache
 export class RequisitionsCacheDocument {
@@ -22,10 +23,18 @@ export class RequisitionsCacheDocument {
 
   async getRequisitionId(insti: string) {
     if (this.requisitions.has(insti)) {
-      return this.requisitions.get(insti)["id"];
+      console.log(`Requisition for institution ${insti} found in cache.`);
+
+      const fetchNew = await confirm({
+        message: `Do you want to fetch a new requisition for institution ${insti}?`,
+        default: false,
+      });
+      if (!fetchNew) {
+        return this.requisitions.get(insti)["id"];
+      }
     }
 
-    // if the requisition doesn't already exist, create a new one
+    console.log(`Creating new requisition for institution: ${insti}`);
 
     const requisitionForInstitution: any = await createRequisition(
       process.env.ACCESS,

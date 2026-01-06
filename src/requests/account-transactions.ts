@@ -15,7 +15,8 @@ const options = {
 
 export async function listTransactionsRequest(
   accessToken: string,
-  accountId: string
+  accountId: string,
+  institutionId: string
 ): Promise<any> {
   return await new Promise(async (resolve, reject) => {
     options.headers.Authorization = `Bearer ${accessToken}`;
@@ -44,7 +45,7 @@ export async function listTransactionsRequest(
           new Promise<void>((writeResolve) => {
             try {
               fs.writeFile(
-                `${process.cwd()}/cache/response-${accountId}.json`,
+                `${process.cwd()}/cache/response-${accountId}-${institutionId}.json`,
                 JSON.stringify(json, null, 2),
                 () => {
                   writeResolve();
