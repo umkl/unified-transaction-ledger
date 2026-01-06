@@ -1,5 +1,5 @@
 import { log } from "console";
-import { TransactionsCacheDocuments } from "./transactionFile";
+import { TransactionsCacheDocuments } from "./transactionsCacheDocuments";
 import { Command } from "commander";
 import { rl } from "./infra";
 const fs = require("fs").promises;
@@ -18,7 +18,7 @@ export default async function spreadsheetAction() {
   const rows = transactions.map((t) => Object.values(t).join(","));
   const csv = [headers, ...rows].join("\n");
 
-  const outputPath = path.join(__dirname, "transactions.csv");
+  const outputPath = path.join(process.cwd(), "all-transactions.csv");
   await fs.writeFile(outputPath, csv, "utf-8");
   log(`Transactions written to ${outputPath}`);
   rl.close();
