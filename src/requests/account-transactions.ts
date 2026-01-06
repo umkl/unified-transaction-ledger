@@ -18,13 +18,15 @@ export async function listTransactionsRequest(
   accountId: string
 ): Promise<any> {
   return await new Promise(async (resolve, reject) => {
-
     options.headers.Authorization = `Bearer ${accessToken}`;
-    options.path = `/api/v2/accounts/${accountId}/transactions/?date_from=2025-09-05&date_to=2025-12-04`;
-
+    const dateTo = new Date();
+    const dateFrom = new Date();
+    dateFrom.setMonth(dateTo.getMonth() - 3);
+    const dateToString = dateTo.toISOString().split("T")[0];
+    const dateFromString = dateFrom.toISOString().split("T")[0];
+    options.path = `/api/v2/accounts/${accountId}/transactions/?date_from=${dateFromString}&date_to=${dateToString}`;
     const req = https.request(options, function (res) {
       const chunks: any = [];
-
 
       res.on("data", function (chunk) {
         chunks.push(chunk);
@@ -33,6 +35,8 @@ export async function listTransactionsRequest(
       res.on("end", function () {
         try {
           const bodyData = Buffer.concat(chunks).toString("utf-8");
+          console.log("Response Body:");
+          console.log(bodyData);
           const json = JSON.parse(bodyData);
           if (json["status_code"] >= 400) {
             reject(new Error(`Error response: ${bodyData}`));
