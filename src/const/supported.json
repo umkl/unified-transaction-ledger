@@ -11,6 +11,13 @@
     "max_access_valid_for_days": "180"
   },
   {
+    "id": "TRADE_REPUBLIC",
+    "name": "Trade Republic",
+    "countries": [
+       "AT"
+    ]
+  },
+  {
       "id": "REVOLUT_REVOLT21",
       "name": "Revolut",
       "bic": "REVOLT21XXX",

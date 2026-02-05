@@ -1,3 +1,111 @@
+import { input } from "@inquirer/prompts";
+import { log } from "console";
+import fs from "fs";
+import { trAuthRequest } from "./requests/trade-republic/authRequest";
+import { trVerifyCodeRequest } from "./requests/trade-republic/verifyCodeRequest";
+import { fetchAllTransactions } from "./transactionsTradeRepublic";
+import { getEnvContent } from "./lib/env-content";
+
 export default async function retrieveTransactionsFromTradeRepublic() {
-  throw new Error("Trade Republic integration is not implemented yet.");
+  let phone = process.env.TR_PHONE;
+
+  if (!phone) {
+    phone = await input({
+      message: "Enter your phone number:",
+      validate: (input) => {
+        return true;
+      },
+    });
+
+    const envFileContent = await getEnvContent();
+
+    await new Promise<void>((resolve, reject) => {
+      fs.writeFile(
+        process.cwd() + "/.env",
+        `${envFileContent}\nTR_PHONE=${phone}`,
+        (err) => {
+          if (err) {
+            reject(err);
+          }
+          resolve();
+        },
+      );
+    });
+  }
+
+  let pin = process.env.TR_PIN;
+
+  if (!pin) {
+    pin = await input({
+      message: "Enter your PIN (4 digits):",
+      validate: (input) => {
+        if (input.length !== 4) {
+          return "Please provide a PIN with a length of 4 digits";
+        }
+        return true;
+      },
+    });
+
+    const envFileContent = await getEnvContent();
+
+    await new Promise<void>((resolve, reject) => {
+      fs.writeFile(
+        process.cwd() + "/.env",
+        `${envFileContent}\nTR_PIN=${pin}`,
+        (err) => {
+          if (err) {
+            reject(err);
+          }
+          resolve();
+        },
+      );
+    });
+    log("Updated/Created .env file with new credentials.");
+  }
+
+  let jwt = process.env.TR_JWT;
+
+  if (!jwt) {
+    jwt = await authenticate(pin, phone);
+
+    const envFileContent = await getEnvContent();
+
+    await new Promise<void>((resolve, reject) => {
+      fs.writeFile(
+        process.cwd() + "/.env",
+        `${envFileContent}\nTR_COOKIE=${jwt}`,
+        (err) => {
+          if (err) {
+            reject(err);
+          }
+          resolve();
+        },
+      );
+    });
+  }
+
+  const transactions = await fetchAllTransactions(jwt);
+
+  console.log("done");
+}
+
+async function authenticate(pin: string, phone: string): Promise<string> {
+  const result = await trAuthRequest(pin, phone);
+
+  console.log(result);
+
+  const processId = result.processId;
+  const countdown = result.countdownInSeconds;
+  if (!processId) {
+    console.error("Error - Invalid PIN or phone number");
+    process.exit(1);
+  }
+
+  const code = await input({
+    message: `Enter Pin (${countdown}s):`,
+  });
+
+  const sessionCookie = await trVerifyCodeRequest(code, processId);
+  const sessionToken = sessionCookie.split(";")[0].split("=")[1];
+  return sessionToken;
 }

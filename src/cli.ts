@@ -20,7 +20,6 @@ program
   .option("-r, --refresh", "Refresh the existing access token.")
   .action(setupAction);
 
-
 program
   .command("pull")
   .description("Retrieve data from the Nordigen API.")
@@ -33,7 +32,7 @@ program
 
 program
   .command("spreadsheet")
-  .description("Create a spreadsheet from the transaction ledger.")
+  .description("Create a spreadsheet from the current transaction ledger.")
   .action(spreadsheetAction);
 
 program.parseAsync();

@@ -5,6 +5,9 @@ declare namespace NodeJS {
     ACCESS: string;
     REFRESH: string;
     REQUISITION_ID: string;
+    TR_PHONE: string;
+    TR_PIN: string;
+    TR_JWT: string;
   }
 
   interface Process {

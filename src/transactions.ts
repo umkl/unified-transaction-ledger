@@ -29,19 +29,21 @@ export async function pullTransactionsIntoCache() {
   for (const insti of checkedInstitutions) {
     if (insti === "TRADE_REPUBLIC") {
       await retrieveTransactionsFromTradeRepublic();
-      continue;
+    } else {
+      const accounts = await listAccounts(
+        process.env.ACCESS,
+        await allRequisitions.getRequisitionId(insti),
+      );
+
+      console.log(
+        `Found ${accounts.length} accounts for institution ${insti}.`,
+      );
+
+      await transactionsCached.fetchTransactionsForInstitution(
+        insti,
+        accounts[0],
+      );
     }
-    const accounts = await listAccounts(
-      process.env.ACCESS,
-      await allRequisitions.getRequisitionId(insti)
-    );
-
-    console.log(`Found ${accounts.length} accounts for institution ${insti}.`);
-
-    await transactionsCached.fetchTransactionsForInstitution(
-      insti,
-      accounts[0]
-    );
   }
 
   log("All done!");
