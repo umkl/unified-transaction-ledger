@@ -3,6 +3,7 @@ import { listTransactionsRequest } from "./requests/account-transactions";
 import { log } from "./utils";
 import { confirm } from "@inquirer/prompts";
 import path from "path";
+import retrieveTransactionsFromTradeRepublic from "./tradeRepublic";
 
 export class TransactionsCacheDocuments {
   private transactions: Transaction[] = [];
@@ -48,15 +49,18 @@ export class TransactionsCacheDocuments {
   }
 
   async persist() {
-    const grouped = this.transactions.reduce((acc, transaction) => {
-      const institution = transaction.institution || "cash";
-      if (!acc[institution]) {
-        acc[institution] = [];
-      }
-      delete transaction.institution;
-      acc[institution].push(transaction);
-      return acc;
-    }, {} as Record<string, Transaction[]>);
+    const grouped = this.transactions.reduce(
+      (acc, transaction) => {
+        const institution = transaction.institution || "cash";
+        if (!acc[institution]) {
+          acc[institution] = [];
+        }
+        delete transaction.institution;
+        acc[institution].push(transaction);
+        return acc;
+      },
+      {} as Record<string, Transaction[]>,
+    );
 
     for (const [key, value] of Object.entries(grouped)) {
       const serialized = JSON.stringify(value, null, 2);
@@ -68,7 +72,7 @@ export class TransactionsCacheDocuments {
 
   async fetchTransactionsForInstitution(
     institutionId: string,
-    accountId: string
+    accountId: string,
   ): Promise<void> {
     const cacheDir = path.join(process.cwd(), "cache");
     const prefix = `response-${accountId}-${institutionId}-`;
@@ -77,7 +81,7 @@ export class TransactionsCacheDocuments {
     try {
       const files = await fs.readdir(cacheDir);
       const matchingFiles = files.filter(
-        (f) => f.startsWith(prefix) && f.endsWith(".json")
+        (f) => f.startsWith(prefix) && f.endsWith(".json"),
       );
       if (matchingFiles.length === 0) {
         throw new Error("No cached response files found");
@@ -105,7 +109,7 @@ export class TransactionsCacheDocuments {
       data = await listTransactionsRequest(
         process.env.ACCESS,
         accountId,
-        institutionId
+        institutionId,
       );
     }
     // For debugging purposes only:
@@ -129,5 +133,55 @@ export class TransactionsCacheDocuments {
     for (const tx of transactionsMapped as any[]) {
       this.addTransaction(tx);
     }
+  }
+
+  async fetchTransactionsFromTradeRepublic() {
+    const cacheDir = path.join(process.cwd(), "cache");
+    const prefix = `response-tr-`;
+
+    let transactions: any;
+    const files = await fs.readdir(cacheDir);
+    const matchingFiles = files.filter(
+      (f) => f.startsWith(prefix) && f.endsWith(".json"),
+    );
+    if (matchingFiles.length !== 0) {
+      matchingFiles.sort((a, b) => {
+        const dateA = a.slice(prefix.length, prefix.length + 10);
+        const dateB = b.slice(prefix.length, prefix.length + 10);
+        return dateA.localeCompare(dateB);
+      });
+      const latestFile = matchingFiles[matchingFiles.length - 1];
+      const cachePath = path.join(cacheDir, latestFile);
+      const data = await fs.readFile(cachePath, "utf8");
+
+      const fetchRegardless = await confirm({
+        message:
+          "There is a cached response - do you want to create a new fetch?",
+      });
+
+      if (fetchRegardless) {
+        transactions = await retrieveTransactionsFromTradeRepublic();
+      } else {
+        transactions = JSON.parse(data);
+      }
+    }
+
+    const transactionsMapped = transactions.map((tx: any): Transaction => {
+      return {
+        id: tx.id,
+        amount: tx.amount.value,
+        date: tx.timestamp,
+        description: tx.title,
+        recipient: tx.title,
+        institution: tx.title,
+      };
+    });
+
+    console.log("transactionsMapped");
+    console.log(transactionsMapped);
+
+    // for (const tx of transactionsMapped as any[]) {
+    //   this.addTransaction(tx);
+    // }
   }
 }

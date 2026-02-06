@@ -1,5 +1,7 @@
 import WebSocket from "ws";
 import { cleanJson } from "./lib/clean-json";
+import { fetchTransactionDetails } from "./transactionDetailsTradeRepublic";
+import { writeFile } from "fs/promises";
 
 // TRANSAKTIONEN ABRUFEN
 export async function fetchAllTransactions(token: string) {
@@ -16,7 +18,7 @@ export async function fetchAllTransactions(token: string) {
         try {
           const cleanedMsg = cleanJson(msg);
           const parsed = JSON.parse(cleanedMsg);
-          console.log(JSON.stringify(parsed, null, 2));
+          console.log("parsed");
         } catch (e) {
           console.log("raw:");
           console.log(msg);
@@ -31,7 +33,7 @@ export async function fetchAllTransactions(token: string) {
     ws.addEventListener("open", async (event) => {
       try {
         const localeConfig = {
-          locale: "de",
+          locale: "en",
           platformId: "webtrading",
           platformVersion: "safari - 18.3.0",
           clientId: "app.traderepublic.com",
@@ -44,8 +46,6 @@ export async function fetchAllTransactions(token: string) {
         let pageCount = 0;
         while (true) {
           pageCount++;
-          console.log("page:", pageCount);
-          console.log("loading page");
           const payload: any = {
             type: "timelineTransactions",
             token,
@@ -53,58 +53,72 @@ export async function fetchAllTransactions(token: string) {
           if (afterCursor) {
             payload.after = afterCursor;
           }
-
           messageId++;
           ws.send(`sub ${messageId} ${JSON.stringify(payload)}`);
+          console.log("loading data");
           const subResponse: any = await waitForMessage();
           ws.send(`unsub ${messageId}`);
           await waitForMessage();
-
           const cleaned = cleanJson(subResponse);
           const jsonData = JSON.parse(cleaned);
-          console.log(jsonData);
 
-          // if (!jsonData.items || jsonData.items.length === 0) {
-          //   console.log("✅ Alle Transaktionen geladen");
-          //   break;
-          // }
+          console.log(jsonData.errors);
 
-          // console.log(
-          //   `📊 ${jsonData.items.length} Transaktionen auf dieser Seite gefunden`,
-          // );
+          if (jsonData?.errors?.length > 0) {
+            reject(new Error(JSON.stringify(jsonData.errors)));
+          }
 
-          // for (const tx of jsonData.items) {
-          //   const txId = tx.id;
-          //   // Überspringe stornierte Transaktionen
-          //   if (tx?.status && tx.status.includes("CANCELED")) {
-          //     console.log(`⏭️  Überspringe stornierte Transaktion: ${txId}`);
-          //     continue;
-          //   }
-          //   if (txId) {
-          //     console.log(`🔍 Lade Details für Transaktion: ${txId}`);
-          //     const [details, newMsgId] = await fetchTransactionDetails(
-          //       ws,
-          //       txId,
-          //       token,
-          //       messageId,
-          //     );
-          //     messageId = newMsgId;
-          //     Object.assign(tx, details);
-          //   }
-          //   allData.push(tx);
-          // }
+          console.log(
+            JSON.stringify(
+              jsonData,
+              (key, value) => {
+                // If the value is an object and not the root, label it instead of expanding
+                return typeof value === "object" && value !== null && key !== ""
+                  ? "[Object]"
+                  : value;
+              },
+              2,
+            ),
+          );
+
+          if (!jsonData.items || jsonData.items.length === 0) {
+            console.log("✅ Alle Transaktionen geladen");
+            break;
+          }
+          console.log(`${jsonData.items.length} transactions loaded`);
+          for (const tx of jsonData.items) {
+            const txId = tx.id;
+            // Überspringe stornierte Transaktionen
+            if (tx?.status && tx.status.includes("CANCELED")) {
+              console.log(`skip cancelled transaction: ${txId}`);
+              continue;
+            }
+            if (txId) {
+              // console.log(`🔍 Lade Details für Transaktion: ${txId}`);
+              // const [details, newMsgId] = await fetchTransactionDetails(
+              //   ws,
+              //   txId,
+              //   token,
+              //   messageId,
+              // );
+              // messageId = newMsgId;
+              // Object.assign(tx, details);
+            }
+            allData.push(tx);
+          }
 
           afterCursor = jsonData.cursors?.after;
           if (!afterCursor) {
             break;
           }
           console.log(
-            `➡️  Nächste Seite wird geladen (Cursor: ${afterCursor.substring(0, 20)}...)`,
+            `next page about to be loaded (Cursor: ${afterCursor.substring(0, 20)}...)`,
           );
         }
 
         console.log("loaded all data");
         ws.close();
+
         resolve(allData);
       } catch (err) {
         console.error("websocket err");
@@ -112,66 +126,9 @@ export async function fetchAllTransactions(token: string) {
         reject(err);
       }
     });
-    if (!ws.onerror) return;
     ws.addEventListener("error", (err) => {
       console.error("WebSocket Fehler:", err);
       reject(err);
     });
   });
 }
-
-// // TRANSAKTIONSDETAILS ABRUFEN
-// async function fetchTransactionDetails(ws, transactionId, token, messageId) {
-//   messageId++;
-//   const payload = {
-//     type: "timelineDetailV2",
-//     id: transactionId,
-//     token,
-//   };
-
-//   // Hilfsfunktion: Auf eine einzelne WebSocket-Nachricht warten
-//   const waitForMessage = () =>
-//     new Promise((resolve) =>
-//       ws.once("message", (data) => {
-//         const msg = data.toString();
-//         console.log(`  📩 Detail-Nachricht erhalten (${msg.length} Zeichen)`);
-//         resolve(msg);
-//       }),
-//     );
-
-//   // Bereinigt fehlerhafte JSON-Antworten
-//   const cleanJson = (msg) => {
-//     const start = msg.indexOf("{");
-//     const end = msg.lastIndexOf("}");
-//     if (start !== -1 && end !== -1) {
-//       return msg.slice(start, end + 1);
-//     }
-//     return "{}";
-//   };
-
-//   ws.send(`sub ${messageId} ${JSON.stringify(payload)}`);
-//   const subResponse = await waitForMessage();
-//   ws.send(`unsub ${messageId}`);
-//   await waitForMessage(); // Abmeldungsbestätigung
-
-//   const cleaned = cleanJson(subResponse);
-//   const jsonData = JSON.parse(cleaned);
-
-//   const transactionData = {};
-//   for (const section of jsonData.sections || []) {
-//     if (section.title === "Transaktion") {
-//       for (const item of section.data || []) {
-//         const key = item.title;
-//         const value = item.detail?.text;
-//         if (key && value) transactionData[key] = value;
-//       }
-//     }
-
-//     if (section?.action?.type === "instrumentDetail") {
-//       // ISIN abrufen
-//       transactionData.ISIN = section.action.payload;
-//     }
-//   }
-
-//   return [transactionData, messageId];
-// }

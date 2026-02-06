@@ -65,6 +65,9 @@ export default async function retrieveTransactionsFromTradeRepublic() {
 
   let jwt = process.env.TR_JWT;
 
+  console.log("JWT");
+  console.log(jwt);
+
   if (!jwt) {
     jwt = await authenticate(pin, phone);
 
@@ -73,7 +76,7 @@ export default async function retrieveTransactionsFromTradeRepublic() {
     await new Promise<void>((resolve, reject) => {
       fs.writeFile(
         process.cwd() + "/.env",
-        `${envFileContent}\nTR_COOKIE=${jwt}`,
+        `${envFileContent}\nTR_JWT=${jwt}`,
         (err) => {
           if (err) {
             reject(err);
@@ -84,9 +87,27 @@ export default async function retrieveTransactionsFromTradeRepublic() {
     });
   }
 
-  const transactions = await fetchAllTransactions(jwt);
+  try {
+    const transactions = await fetchAllTransactions(jwt);
 
-  console.log("done");
+    await new Promise<void>((resolve, reject) => {
+      fs.writeFile(
+        process.cwd() +
+          `/cache/response-tr-${new Date().toISOString().split("T")[0]}.json`,
+        JSON.stringify(transactions, null, 2),
+        (err) => {
+          if (err) {
+            reject(err);
+          }
+          resolve();
+        },
+      );
+    });
+
+    return transactions;
+  } catch (e) {
+    throw e;
+  }
 }
 
 async function authenticate(pin: string, phone: string): Promise<string> {

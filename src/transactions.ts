@@ -24,30 +24,26 @@ export async function pullTransactionsIntoCache() {
   });
 
   const allRequisitions = await RequisitionsCacheDocument.create();
-  const transactionsCached = await TransactionsCacheDocuments.create();
+  const transactions = await TransactionsCacheDocuments.create();
 
   for (const insti of checkedInstitutions) {
     if (insti === "TRADE_REPUBLIC") {
-      await retrieveTransactionsFromTradeRepublic();
+      console.log("fetching data from trade republic");
+      await transactions.fetchTransactionsFromTradeRepublic();
     } else {
       const accounts = await listAccounts(
         process.env.ACCESS,
         await allRequisitions.getRequisitionId(insti),
       );
-
       console.log(
         `Found ${accounts.length} accounts for institution ${insti}.`,
       );
-
-      await transactionsCached.fetchTransactionsForInstitution(
-        insti,
-        accounts[0],
-      );
+      await transactions.fetchTransactionsForInstitution(insti, accounts[0]);
     }
   }
 
   log("All done!");
 
   await allRequisitions.persist();
-  await transactionsCached.persist();
+  await transactions.persist();
 }
