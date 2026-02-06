@@ -4,6 +4,7 @@ import { log } from "./utils";
 import { confirm } from "@inquirer/prompts";
 import path from "path";
 import retrieveTransactionsFromTradeRepublic from "./tradeRepublic";
+import { fileExists } from "./lib/file-exists";
 
 export class TransactionsCacheDocuments {
   private transactions: Transaction[] = [];
@@ -23,6 +24,9 @@ export class TransactionsCacheDocuments {
     const readTransactions: any[] = [];
     for (const bankId of bankIds) {
       const filePath = process.cwd() + `/cache/transactions-${bankId}.json`;
+
+      const doesFileExist = await fileExists(filePath);
+      if (!doesFileExist) break;
       const rawTransactions = await fs.readFile(filePath, {
         encoding: "utf-8",
       });
@@ -144,6 +148,8 @@ export class TransactionsCacheDocuments {
     const matchingFiles = files.filter(
       (f) => f.startsWith(prefix) && f.endsWith(".json"),
     );
+    console.log("matching files");
+    console.log(matchingFiles);
     if (matchingFiles.length !== 0) {
       matchingFiles.sort((a, b) => {
         const dateA = a.slice(prefix.length, prefix.length + 10);
@@ -164,9 +170,11 @@ export class TransactionsCacheDocuments {
       } else {
         transactions = JSON.parse(data);
       }
+    } else {
+      transactions = await retrieveTransactionsFromTradeRepublic();
     }
 
-    const transactionsMapped = transactions.map((tx: any): Transaction => {
+    const transactionsMapped = transactions?.map((tx: any): Transaction => {
       return {
         id: tx.id,
         amount: tx.amount.value,

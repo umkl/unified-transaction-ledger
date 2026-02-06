@@ -15,11 +15,21 @@ export class RequisitionsCacheDocument {
 
   public static async create() {
     const filePath = process.cwd() + "/cache/requisitions.json";
-    const rawTransactions = await fs.readFile(filePath, { encoding: "utf-8" });
-    const jsonTransactions = JSON.parse(rawTransactions);
-    return new RequisitionsCacheDocument(
-      new Map(Object.entries(jsonTransactions))
-    );
+    try {
+      const rawRequisitions = await fs.readFile(filePath, {
+        encoding: "utf-8",
+      });
+      const jsonRequisitions = JSON.parse(rawRequisitions);
+      return new RequisitionsCacheDocument(
+        new Map(Object.entries(jsonRequisitions)),
+      );
+    } catch (e) {
+      await fs.mkdir(process.cwd() + "/cache", { recursive: true });
+      await fs.writeFile(filePath, "", {
+        encoding: "utf-8",
+      });
+      return new RequisitionsCacheDocument(new Map());
+    }
   }
 
   async getRequisitionId(insti: string) {
@@ -39,7 +49,7 @@ export class RequisitionsCacheDocument {
 
     const requisitionForInstitution: any = await createRequisition(
       process.env.ACCESS,
-      insti
+      insti,
     );
 
     open(requisitionForInstitution["link"] as string);
@@ -49,7 +59,7 @@ export class RequisitionsCacheDocument {
         if (req.url?.startsWith("/callback")) {
           res.writeHead(200, { "Content-Type": "text/html" });
           res.end(
-            "<h1>Authorization successful! You can close this window.</h1>"
+            "<h1>Authorization successful! You can close this window.</h1>",
           );
           const url = new URL(req.url, `http://${req.headers.host}`);
           log(JSON.stringify(Object.fromEntries(url.searchParams)));
@@ -76,7 +86,7 @@ export class RequisitionsCacheDocument {
     const serialized = JSON.stringify(
       Object.fromEntries(this.requisitions),
       null,
-      2
+      2,
     );
     const filePath = process.cwd() + "/cache/requisitions.json";
     await fs.writeFile(filePath, serialized);
