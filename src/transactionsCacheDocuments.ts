@@ -5,6 +5,7 @@ import { confirm } from "@inquirer/prompts";
 import path from "path";
 import retrieveTransactionsFromTradeRepublic from "./tradeRepublic";
 import { fileExists } from "./lib/file-exists";
+import { toSnakeCase } from "./lib/snake-case";
 
 export class TransactionsCacheDocuments {
   private transactions: Transaction[] = [];
@@ -55,11 +56,11 @@ export class TransactionsCacheDocuments {
   async persist() {
     const grouped = this.transactions.reduce(
       (acc, transaction) => {
-        const institution = transaction.institution || "cash";
+        const institution = toSnakeCase(transaction.institution || "cash");
         if (!acc[institution]) {
           acc[institution] = [];
         }
-        delete transaction.institution;
+        // delete transaction.institution;
         acc[institution].push(transaction);
         return acc;
       },
@@ -181,15 +182,15 @@ export class TransactionsCacheDocuments {
         date: tx.timestamp,
         description: tx.title,
         recipient: tx.title,
-        institution: tx.title,
+        institution: "Trade Republic",
       };
     });
 
     console.log("transactionsMapped");
     console.log(transactionsMapped);
 
-    // for (const tx of transactionsMapped as any[]) {
-    //   this.addTransaction(tx);
-    // }
+    for (const tx of transactionsMapped as any[]) {
+      this.addTransaction(tx);
+    }
   }
 }

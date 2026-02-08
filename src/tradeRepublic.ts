@@ -1,13 +1,16 @@
-import { input } from "@inquirer/prompts";
+import { confirm, input } from "@inquirer/prompts";
 import { log } from "console";
 import fs from "fs";
 import { trAuthRequest } from "./requests/trade-republic/authRequest";
 import { trVerifyCodeRequest } from "./requests/trade-republic/verifyCodeRequest";
 import { fetchAllTransactions } from "./transactionsTradeRepublic";
 import { getEnvContent } from "./lib/env-content";
+import { writeFile } from "fs/promises";
 
 export default async function retrieveTransactionsFromTradeRepublic() {
   let phone = process.env.TR_PHONE;
+
+  const envFileContent = await getEnvContent();
 
   if (!phone) {
     phone = await input({
@@ -16,8 +19,6 @@ export default async function retrieveTransactionsFromTradeRepublic() {
         return true;
       },
     });
-
-    const envFileContent = await getEnvContent();
 
     await new Promise<void>((resolve, reject) => {
       fs.writeFile(
@@ -68,7 +69,11 @@ export default async function retrieveTransactionsFromTradeRepublic() {
   console.log("JWT");
   console.log(jwt);
 
-  if (!jwt) {
+  const fetchNewJWT = await confirm({
+    message: "Do you want to fetch a new JWT?",
+  });
+
+  if (!jwt || fetchNewJWT) {
     jwt = await authenticate(pin, phone);
 
     const envFileContent = await getEnvContent();

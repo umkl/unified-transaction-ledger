@@ -24,12 +24,12 @@ export async function pullTransactionsIntoCache() {
   });
 
   const allRequisitions = await RequisitionsCacheDocument.create();
-  const transactions = await TransactionsCacheDocuments.create();
+  const transactionsCacheDocument = await TransactionsCacheDocuments.create();
 
   for (const insti of checkedInstitutions) {
     if (insti === "TRADE_REPUBLIC") {
       console.log("fetching data from trade republic");
-      await transactions.fetchTransactionsFromTradeRepublic();
+      await transactionsCacheDocument.fetchTransactionsFromTradeRepublic();
     } else {
       const accounts = await listAccounts(
         process.env.ACCESS,
@@ -38,12 +38,15 @@ export async function pullTransactionsIntoCache() {
       console.log(
         `Found ${accounts.length} accounts for institution ${insti}.`,
       );
-      await transactions.fetchTransactionsForInstitution(insti, accounts[0]);
+      await transactionsCacheDocument.fetchTransactionsForInstitution(
+        insti,
+        accounts[0],
+      );
     }
   }
 
   log("All done!");
 
   await allRequisitions.persist();
-  await transactions.persist();
+  await transactionsCacheDocument.persist();
 }

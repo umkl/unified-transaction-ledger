@@ -95,14 +95,14 @@ export async function fetchAllTransactions(token: string) {
             }
             if (txId) {
               // console.log(`🔍 Lade Details für Transaktion: ${txId}`);
-              // const [details, newMsgId] = await fetchTransactionDetails(
-              //   ws,
-              //   txId,
-              //   token,
-              //   messageId,
-              // );
-              // messageId = newMsgId;
-              // Object.assign(tx, details);
+              const [details, newMsgId] = await fetchTransactionDetails(
+                ws,
+                txId,
+                token,
+                messageId,
+              );
+              messageId = newMsgId;
+              Object.assign(tx, details);
             }
             allData.push(tx);
           }
