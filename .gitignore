@@ -5,3 +5,4 @@ cache/
 dist/
 out/
 .DS_Store
+all-transactions.csv

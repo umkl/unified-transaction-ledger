@@ -21,13 +21,19 @@ export class TransactionsCacheDocuments {
   }
 
   public static async create(institutionIds?: string[]) {
+    console.log("institution ids:");
+    console.log(institutionIds);
+
     const bankIds = institutionIds ?? ["cash"];
     const readTransactions: any[] = [];
     for (const bankId of bankIds) {
       const filePath = process.cwd() + `/cache/transactions-${bankId}.json`;
 
       const doesFileExist = await fileExists(filePath);
-      if (!doesFileExist) break;
+      console.log("filename:");
+      console.log(filePath);
+      console.log("file doesn't exist");
+      if (!doesFileExist) continue;
       const rawTransactions = await fs.readFile(filePath, {
         encoding: "utf-8",
       });
