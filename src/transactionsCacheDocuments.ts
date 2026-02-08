@@ -11,13 +11,7 @@ export class TransactionsCacheDocuments {
   private transactions: Transaction[] = [];
 
   private constructor(transactions: Transaction[] = []) {
-    this.transactions = transactions.map((t: any) => ({
-      id: t.id,
-      amount: t.amount,
-      date: new Date(t.date),
-      description: t.description,
-      recipient: t.recipient,
-    }));
+    this.transactions = transactions;
   }
 
   public static async create(institutionIds?: string[]) {
@@ -25,7 +19,7 @@ export class TransactionsCacheDocuments {
     console.log(institutionIds);
 
     const bankIds = institutionIds ?? ["cash"];
-    const readTransactions: any[] = [];
+    const readTransactions: Transaction[] = [];
     for (const bankId of bankIds) {
       const filePath = process.cwd() + `/cache/transactions-${bankId}.json`;
 
@@ -39,17 +33,29 @@ export class TransactionsCacheDocuments {
       });
       console.log(`Loaded transactions from ${filePath}`);
       const jsonTransactions: any[] = JSON.parse(rawTransactions);
+      for (const trans of jsonTransactions) {
+        readTransactions.push({
+          id: trans.id,
+          amount: trans.amount,
+          date: new Date(trans.date),
+          description: trans.description,
+          recipient: trans.recipient,
+          institution: trans.institution,
+        });
+      }
       jsonTransactions.map((x) => readTransactions.push(x));
     }
     return new TransactionsCacheDocuments(readTransactions);
   }
 
   addTransaction(transaction: Transaction) {
+    console.log("transactino:");
+    console.log(transaction);
     this.transactions.push(transaction);
   }
 
   getTransactions(year?: number, month?: number): Transaction[] {
-    console.log(this.transactions.length);
+    console.log(this.transactions);
     return this.transactions.filter((t) => {
       const tDate = new Date(t.date);
       const matchesYear = year === undefined || tDate.getFullYear() === year;
@@ -67,6 +73,7 @@ export class TransactionsCacheDocuments {
           acc[institution] = [];
         }
         // delete transaction.institution;
+
         acc[institution].push(transaction);
         return acc;
       },
