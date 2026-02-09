@@ -1,16 +1,18 @@
 import { checkbox } from "@inquirer/prompts";
 import { promptCountry } from "./country";
 import getSupportedInstitutions from "./supported";
-import { RequisitionsCacheDocument } from "./RequisitionFile";
 import { TransactionsCacheDocuments } from "./transactionsCacheDocuments";
 import { log } from "./utils";
-import retrieveTransactionsFromTradeRepublic from "./tradeRepublic";
 import { listAccounts } from "./requests/list-accounts";
+import { RequisitionsCacheDocument } from "./RequisitionFile";
 
-export async function pullTransactionsIntoCache() {
-  const countryCode = await promptCountry();
+export async function pullTransactionsIntoCache(
+  transactionsCacheDocument: TransactionsCacheDocuments,
+) {
+  // const countryCode = await promptCountry();
 
-  const institutions = await getSupportedInstitutions(countryCode);
+  const institutions = await getSupportedInstitutions();
+
   const results = institutions.map((inst) => ({
     name: inst.name,
     value: inst.id,
@@ -23,8 +25,7 @@ export async function pullTransactionsIntoCache() {
     required: true,
   });
 
-  const allRequisitions = await RequisitionsCacheDocument.create();
-  const transactionsCacheDocument = await TransactionsCacheDocuments.create();
+  const requisitionsDocument = await RequisitionsCacheDocument.create();
 
   for (const insti of checkedInstitutions) {
     if (insti === "TRADE_REPUBLIC") {
@@ -33,11 +34,16 @@ export async function pullTransactionsIntoCache() {
     } else {
       const accounts = await listAccounts(
         process.env.ACCESS,
-        await allRequisitions.getRequisitionId(insti),
+        await requisitionsDocument.getRequisitionId(insti),
       );
       console.log(
         `Found ${accounts.length} accounts for institution ${insti}.`,
       );
+      if (accounts.length < 1) {
+        throw new Error(
+          "No accounts found for this institution, please reauthenticate",
+        );
+      }
       await transactionsCacheDocument.fetchTransactionsForInstitution(
         insti,
         accounts[0],
@@ -45,8 +51,5 @@ export async function pullTransactionsIntoCache() {
     }
   }
 
-  log("All done!");
-
-  await allRequisitions.persist();
-  await transactionsCacheDocument.persist();
+  (await requisitionsDocument).persist();
 }

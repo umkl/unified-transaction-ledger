@@ -16,13 +16,17 @@ program
 
 program
   .command("setup")
-  .description("Setup the necessary tokens for accessing the Nordigen API.")
+  .description(
+    "Setup the necessary tokens for accessing the APIs from supported banks.",
+  )
   .option("-r, --refresh", "Refresh the existing access token.")
   .action(setupAction);
 
 program
   .command("pull")
-  .description("Retrieve data from the Nordigen API.")
+  .description(
+    "Retrieve data from the institutions and add them to the transactions list.",
+  )
   .action(pullAction);
 
 program

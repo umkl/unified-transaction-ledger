@@ -11,46 +11,40 @@ export class TransactionsCacheDocuments {
   private transactions: Transaction[] = [];
 
   private constructor(transactions: Transaction[] = []) {
+    console.log("Initial Transactions: ", transactions.length);
     this.transactions = transactions;
   }
 
-  public static async create(institutionIds?: string[]) {
-    console.log("institution ids:");
-    console.log(institutionIds);
-
-    const bankIds = institutionIds ?? ["cash"];
+  public static async create() {
+    // reads from the json file
     const readTransactions: Transaction[] = [];
-    for (const bankId of bankIds) {
-      const filePath = process.cwd() + `/cache/transactions-${bankId}.json`;
+    const filePath = process.cwd() + `/cache/transactions.json`;
+    const doesFileExist = await fileExists(filePath);
 
-      const doesFileExist = await fileExists(filePath);
-      console.log("filename:");
-      console.log(filePath);
-      console.log("file doesn't exist");
-      if (!doesFileExist) continue;
-      const rawTransactions = await fs.readFile(filePath, {
-        encoding: "utf-8",
+    if (!doesFileExist) return new TransactionsCacheDocuments();
+
+    const rawTransactions = await fs.readFile(filePath, {
+      encoding: "utf-8",
+    });
+
+    const jsonTransactions: any[] = JSON.parse(rawTransactions);
+
+    for (const trans of jsonTransactions) {
+      readTransactions.push({
+        id: trans.id,
+        amount: trans.amount,
+        date: new Date(trans.date),
+        description: trans.description,
+        recipient: trans.recipient,
+        institution: trans.institution,
       });
-      console.log(`Loaded transactions from ${filePath}`);
-      const jsonTransactions: any[] = JSON.parse(rawTransactions);
-      for (const trans of jsonTransactions) {
-        readTransactions.push({
-          id: trans.id,
-          amount: trans.amount,
-          date: new Date(trans.date),
-          description: trans.description,
-          recipient: trans.recipient,
-          institution: trans.institution,
-        });
-      }
-      jsonTransactions.map((x) => readTransactions.push(x));
     }
+    console.log(`Loaded transactions: ${jsonTransactions.length}`);
+
     return new TransactionsCacheDocuments(readTransactions);
   }
 
   addTransaction(transaction: Transaction) {
-    console.log("transactino:");
-    console.log(transaction);
     this.transactions.push(transaction);
   }
 
@@ -66,26 +60,25 @@ export class TransactionsCacheDocuments {
   }
 
   async persist() {
-    const grouped = this.transactions.reduce(
-      (acc, transaction) => {
-        const institution = toSnakeCase(transaction.institution || "cash");
-        if (!acc[institution]) {
-          acc[institution] = [];
-        }
-        // delete transaction.institution;
+    // const grouped = this.transactions.reduce(
+    //   (acc, transaction) => {
+    //     const institution = toSnakeCase(transaction.institution || "cash");
+    //     if (!acc[institution]) {
+    //       acc[institution] = [];
+    //     }
+    //     // delete transaction.institution;
+    //     acc[institution].push(transaction);
+    //     return acc;
+    //   },
+    //   {} as Record<string, Transaction[]>,
+    // );
 
-        acc[institution].push(transaction);
-        return acc;
-      },
-      {} as Record<string, Transaction[]>,
-    );
+    // console.log(this.transactions.l)
 
-    for (const [key, value] of Object.entries(grouped)) {
-      const serialized = JSON.stringify(value, null, 2);
-      const filePath = process.cwd() + `/cache/transactions-${key}.json`;
-      await fs.writeFile(filePath, serialized);
-      log(`Transactions for ${key} persisted to ${filePath}`);
-    }
+    const serialized = JSON.stringify(this.transactions, null, 2);
+    const filePath = process.cwd() + `/cache/transactions.json`;
+    await fs.writeFile(filePath, serialized);
+    log(`Persisted Transactions: ${this.transactions.length}`);
   }
 
   async fetchTransactionsForInstitution(
@@ -188,22 +181,28 @@ export class TransactionsCacheDocuments {
       transactions = await retrieveTransactionsFromTradeRepublic();
     }
 
-    const transactionsMapped = transactions?.map((tx: any): Transaction => {
-      return {
-        id: tx.id,
-        amount: tx.amount.value,
-        date: tx.timestamp,
-        description: tx.title,
-        recipient: tx.title,
-        institution: "Trade Republic",
-      };
-    });
+    const transactionsMapped: Transaction[] = transactions?.map(
+      (tx: any): Transaction => {
+        return {
+          id: tx.id,
+          amount: tx.amount.value,
+          date: tx.timestamp,
+          description: tx.title,
+          recipient: tx.title,
+          institution: "Trade Republic",
+        };
+      },
+    );
 
-    console.log("transactionsMapped");
-    console.log(transactionsMapped);
-
-    for (const tx of transactionsMapped as any[]) {
-      this.addTransaction(tx);
+    for (const newTransaction of transactionsMapped) {
+      const existingTransactionWithSameId = this.transactions.find(
+        (existingTransaction) => {
+          return existingTransaction.id === newTransaction.id;
+        },
+      );
+      if (existingTransactionWithSameId === undefined) {
+        this.addTransaction(newTransaction);
+      }
     }
   }
 }

@@ -8,9 +8,7 @@ const path = require("path");
 import supported from "./const/supported.json";
 
 export default async function spreadsheetAction() {
-  const institutionIds = supported.map((inst) => inst.id.toLowerCase());
-  const transactionFile =
-    await TransactionsCacheDocuments.create(institutionIds);
+  const transactionFile = await TransactionsCacheDocuments.create();
 
   log("Create Spreadsheet with the Data");
   const yearInput = await input({

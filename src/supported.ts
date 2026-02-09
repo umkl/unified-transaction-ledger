@@ -1,7 +1,7 @@
 import fs from "fs";
 
 export default async function getSupportedInstitutions(
-  countryCode: string,
+  countryCode?: string,
 ): Promise<SupportedInstitution[]> {
   const result = await new Promise<SupportedInstitution[]>(
     (resolve, reject) => {
@@ -15,5 +15,8 @@ export default async function getSupportedInstitutions(
       );
     },
   );
-  return result.filter((inst) => inst.countries?.includes(countryCode));
+  if (countryCode) {
+    return result.filter((inst) => inst.countries?.includes(countryCode));
+  }
+  return result;
 }

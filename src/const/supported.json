@@ -4,10 +4,6 @@
     "name": "Raiffeisen Bank",
     "bic": "RZBAATWW",
     "transaction_total_days": "730",
-    "countries": [
-      "AT"
-    ],
-    "logo": "https://cdn-logos.gocardless.com/ais/RAIFFEISEN_RZBCCZPP.png",
     "max_access_valid_for_days": "180"
   },
   {
@@ -18,42 +14,10 @@
     ]
   },
   {
-      "id": "REVOLUT_REVOLT21",
-      "name": "Revolut",
-      "bic": "REVOLT21XXX",
-      "transaction_total_days": "730",
-      "countries": [
-          "HR",
-          "PT",
-          "LU",
-          "BG",
-          "LI",
-          "GR",
-          "DK",
-          "AT",
-          "LV",
-          "PL",
-          "FR",
-          "IE",
-          "CY",
-          "NL",
-          "EE",
-          "RO",
-          "NO",
-          "IT",
-          "LT",
-          "FI",
-          "SK",
-          "HU",
-          "SI",
-          "SE",
-          "CZ",
-          "IS",
-          "MT",
-          "BE",
-          "ES"
-      ],
-      "logo": "https://storage.googleapis.com/gc-prd-institution_icons-production/UK/PNG/revolut.png",
-      "max_access_valid_for_days": "180"
+    "id": "REVOLUT_REVOLT21",
+    "name": "Revolut",
+    "bic": "REVOLT21XXX",
+    "transaction_total_days": "730",
+    "max_access_valid_for_days": "180"
   }
 ]
