@@ -1,6 +1,7 @@
 import fs from "fs";
+import { log } from "../utils";
 
-export async function setupEnv() {
+export async function loadEnv() {
   const doesEnvExist = await new Promise<boolean>((resolve) => {
     fs.access(process.cwd() + "/.env", fs.constants.F_OK, (err) => {
       resolve(!err);
@@ -24,4 +25,26 @@ export async function setupEnv() {
       process.env[key] = value;
     }
   }
+}
+export async function persistEnv(keysToPersist: string[] = []) {
+  const envContent = keysToPersist
+    .map((key) => {
+      const value = process.env[key] || "";
+      const assignment = `${key}=${value}`;
+      log(assignment);
+      return assignment;
+    })
+    .join("\n");
+
+  return new Promise<void>((resolve, reject) => {
+    fs.writeFile(
+      process.cwd() + "/.env",
+      envContent,
+      { encoding: "utf-8" },
+      (err) => {
+        if (err) reject(err);
+        resolve();
+      },
+    );
+  });
 }

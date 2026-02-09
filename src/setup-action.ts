@@ -3,23 +3,31 @@ import { rl } from "./infra";
 import fetchNewTokenPair from "./requests/gcl-new-token-pair";
 import fs from "fs";
 import { log } from "./utils";
-import { setupEnv } from "./lib/setup-env";
+import { loadEnv, persistEnv } from "./lib/env";
 import { confirm } from "@inquirer/prompts";
 import fetchNewAccessToken from "./requests/gcl-new-access-token";
 
 export async function setupAction(): Promise<void> {
   log("Reading current .env");
-  await setupEnv();
+  await loadEnv();
 
-  const secretId = await getOrPromptEnvVar("SECRET_ID");
-  const secretKey = await getOrPromptEnvVar("SECRET_KEY");
-  const accessToken = getOrFetchNewToken(secretId, secretKey);
+  const secretId = await getOrPromptEnvVar("GCL_SECRET_ID");
+  const secretKey = await getOrPromptEnvVar("GCL_SECRET_KEY");
+  const accessToken = await getOrFetchNewToken(secretId, secretKey);
+  log(accessToken);
 
+  log(process.env["GCL_ACCESS_TOKEN"]!);
+  log(process.env["GCL_REFRESH_TOKEN"]!);
+
+  persistEnv([
+    "GCL_SECRET_ID",
+    "GCL_SECRET_KEY",
+    "GCL_ACCESS_TOKEN",
+    "GCL_REFRESH_TOKEN",
+  ]);
   log("Setup complete.");
   rl.close();
 }
-
-// import refreshTokenRequest from "./requests/token-refresh";
 
 export async function getOrFetchNewToken(
   secretId: string,
@@ -36,16 +44,20 @@ export async function getOrFetchNewToken(
   }
 
   const refreshToken = await getOrPromptEnvVar("GCL_REFRESH_TOKEN", false);
-  if (!refreshToken) {
-    const content = await fetchNewTokenPair(secretId, secretKey);
-    process.env["GCL_ACCESS_TOKEN"] = content["access"] as string;
-    process.env["GCL_REFRESH_TOKEN"] = content["refresh"] as string;
-    return content["access"] as string;
+  if (refreshToken) {
+    try {
+      const result = await fetchNewAccessToken(refreshToken);
+      return result;
+    } catch (e) {
+      log("Couldn't refresh using refresh token.");
+      log("Falling back to fetching new token pair.");
+    }
   }
 
-  const result = await fetchNewAccessToken(refreshToken);
-
-  return result;
+  const content = await fetchNewTokenPair(secretId, secretKey);
+  process.env["GCL_ACCESS_TOKEN"] = content["access"] as string;
+  process.env["GCL_REFRESH_TOKEN"] = content["refresh"] as string;
+  return content["access"] as string;
 }
 
 async function getOrPromptEnvVar(
