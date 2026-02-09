@@ -3,9 +3,10 @@ import { listTransactionsRequest } from "./requests/account-transactions";
 import { log } from "./utils";
 import { confirm } from "@inquirer/prompts";
 import path from "path";
-import retrieveTransactionsFromTradeRepublic from "./tradeRepublic";
+
 import { fileExists } from "./lib/file-exists";
 import { toSnakeCase } from "./lib/snake-case";
+import retrieveTransactionsFromTradeRepublic from "./traderepublic";
 
 export class TransactionsCacheDocuments {
   private transactions: Transaction[] = [];

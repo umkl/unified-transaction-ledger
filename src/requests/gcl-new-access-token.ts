@@ -12,8 +12,8 @@ var options = {
   maxRedirects: 20,
 };
 
-export default function refreshTokenRequest(
-  refreshToken: string
+export default function fetchNewAccessToken(
+  refreshToken: string,
 ): Promise<any> {
   return new Promise((resolve, reject) => {
     const postData = JSON.stringify({

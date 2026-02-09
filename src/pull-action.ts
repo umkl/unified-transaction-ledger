@@ -1,10 +1,19 @@
-import { checkbox } from "@inquirer/prompts";
-import { promptCountry } from "./country";
+import { checkbox, select } from "@inquirer/prompts";
+import { rl } from "./infra";
+import { RequisitionsCacheDocument } from "./RequisitionDocument";
+import { TransactionsCacheDocuments } from "./TransactionDocument";
 import getSupportedInstitutions from "./supported";
-import { TransactionsCacheDocuments } from "./transactionsCacheDocuments";
-import { log } from "./utils";
 import { listAccounts } from "./requests/list-accounts";
-import { RequisitionsCacheDocument } from "./RequisitionFile";
+
+export default async function pullAction() {
+  const transactionsCacheDocument = await TransactionsCacheDocuments.create();
+
+  await pullTransactionsIntoCache(transactionsCacheDocument);
+
+  await transactionsCacheDocument.persist();
+
+  rl.close();
+}
 
 export async function pullTransactionsIntoCache(
   transactionsCacheDocument: TransactionsCacheDocuments,

@@ -3,11 +3,11 @@
 import { program } from "commander";
 import { version } from "../package.json";
 
-import { setupAction } from "./setupAction";
+import { setupAction } from "./setup-action";
 import { excelAction } from "./excel";
 import cashAction from "./cash";
 import spreadsheetAction from "./spreadsheet";
-import pullAction from "./pullAction";
+import pullAction from "./pull-action";
 
 program
   .name("utl")
@@ -19,7 +19,6 @@ program
   .description(
     "Setup the necessary tokens for accessing the APIs from supported banks.",
   )
-  .option("-r, --refresh", "Refresh the existing access token.")
   .action(setupAction);
 
 program

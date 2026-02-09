@@ -12,9 +12,9 @@ const options = {
   maxRedirects: 20,
 };
 
-export default async function receiveRefreshToken(
+export default async function fetchNewTokenPair(
   secretId: string,
-  secretKey: string
+  secretKey: string,
 ): Promise<Record<string, unknown>> {
   return await new Promise((resolve, reject) => {
     var postData = JSON.stringify({

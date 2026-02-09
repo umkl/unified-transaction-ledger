@@ -1,5 +1,5 @@
 import { log } from "console";
-import { TransactionsCacheDocuments } from "./transactionsCacheDocuments";
+import { TransactionsCacheDocuments } from "./TransactionDocument";
 import { Command } from "commander";
 import { rl } from "./infra";
 import { input } from "@inquirer/prompts";
