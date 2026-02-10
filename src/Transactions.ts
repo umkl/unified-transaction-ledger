@@ -9,21 +9,19 @@ import { toSnakeCase } from "./lib/snake-case";
 import retrieveTransactionsFromTradeRepublic from "./traderepublic";
 import getSupportedInstitutions from "./supported";
 
-export class TransactionsCacheDocuments {
+export class Transactions {
   private transactions: Transaction[] = [];
-
   private constructor(transactions: Transaction[] = []) {
     console.log("Initial Transactions: ", transactions.length);
     this.transactions = transactions;
   }
-
-  public static async create() {
+  public static async createUsingPotentiallyExisitingTransactions() {
     // reads from the json file
     const readTransactions: Transaction[] = [];
     const filePath = process.cwd() + `/cache/transactions.json`;
     const doesFileExist = await fileExists(filePath);
 
-    if (!doesFileExist) return new TransactionsCacheDocuments();
+    if (!doesFileExist) return new Transactions();
 
     const rawTransactions = await fs.readFile(filePath, {
       encoding: "utf-8",
@@ -43,14 +41,14 @@ export class TransactionsCacheDocuments {
     }
     console.log(`Loaded transactions: ${jsonTransactions.length}`);
 
-    return new TransactionsCacheDocuments(readTransactions);
+    return new Transactions(readTransactions);
   }
 
-  addTransaction(transaction: Transaction) {
+  public addTransaction(transaction: Transaction) {
     this.transactions.push(transaction);
   }
 
-  getTransactions(year?: number, month?: number): Transaction[] {
+  public getTransactions(year?: number, month?: number): Transaction[] {
     console.log(this.transactions);
     return this.transactions.filter((t) => {
       const tDate = new Date(t.date);
@@ -61,14 +59,23 @@ export class TransactionsCacheDocuments {
     });
   }
 
-  async persist() {
-    const serialized = JSON.stringify(this.transactions, null, 2);
+  public async writeToJsonFile() {
+    const serialized = JSON.stringify(
+      this.transactions.map((tx) => {
+        return {
+          ...tx,
+          institution: undefined,
+        };
+      }),
+      null,
+      2,
+    );
     const filePath = process.cwd() + `/cache/transactions.json`;
     await fs.writeFile(filePath, serialized);
     log(`Persisted Transactions: ${this.transactions.length}`);
   }
 
-  async fetchTransactionsForInstitution(
+  public async fetchTransactionsForInstitution(
     institutionId: string,
     accountId: string,
   ): Promise<void> {
@@ -133,11 +140,16 @@ export class TransactionsCacheDocuments {
     }
   }
 
-  async fetchTransactionsRaiffeisen(
+  public async fetchTransactionsRaiffeisen(
     institutionId: string = "RAIFFEISEN_AT_RZBAATWW",
     accountId: string,
   ): Promise<void> {
-    console.log("RAIBA");
+    const supported = await getSupportedInstitutions();
+    const institution = supported.find((x) => x.id === institutionId);
+    if (!institution) {
+      throw new Error("Institution wasn't found");
+    }
+
     const cacheDir = path.join(process.cwd(), "cache");
     const prefix = `response-${institutionId}-${new Date().toISOString().split("T")[0]}`;
 
@@ -171,11 +183,11 @@ export class TransactionsCacheDocuments {
     } catch (err: Error | any) {
       log("Proceeding to fetch from API...");
       // For debugging purposes only:
-      const result = await fs.readFile(
-        process.cwd() +
-          `/cache/response-1b686203-f5b6-4198-b983-0b7e9bbd4085-RAIFFEISEN_AT_RZBAATWW-2026-02-09.json`,
-        { encoding: "utf-8" },
-      );
+      // const result = await fs.readFile(
+      //   process.cwd() +
+      //     `/cache/response-1b686203-f5b6-4198-b983-0b7e9bbd4085-RAIFFEISEN_AT_RZBAATWW-2026-02-09.json`,
+      //   { encoding: "utf-8" },
+      // );
 
       // data = JSON.parse(result);
 
@@ -187,16 +199,23 @@ export class TransactionsCacheDocuments {
     }
     // pending would also be available, but for this scenario only booked ones are being used
     const transactions = data.transactions.booked;
-    const supported = await getSupportedInstitutions();
+
     const transactionsMapped: Transaction[] = transactions?.map(
       (tx: any): Transaction => {
+        const amount = +tx.transactionAmount.amount;
+        const isNegative = amount < 0;
+
         return {
           id: tx.transactionId,
           amount: tx.transactionAmount.amount,
           date: tx.timestamp,
           description: tx.title,
+          type: isNegative
+            ? TransactionType.LIABILITY
+            : TransactionType.RECEIVABLE,
           recipient: tx.title,
-          institution: supported.find((x) => x.id === institutionId)?.name,
+          institution: institution,
+          institutionId: institution.id,
         };
       },
     );
@@ -213,9 +232,14 @@ export class TransactionsCacheDocuments {
     }
   }
 
-  async fetchTransactionsFromTradeRepublic(
+  public async fetchTransactionsFromTradeRepublic(
     institutionId: string = "TRADE_REPUBLIC",
   ) {
+    const supported = await getSupportedInstitutions();
+    const institution = supported.find((x) => x.id === institutionId);
+    if (!institution) {
+      throw new Error("Institution wasn't found");
+    }
     const cacheDir = path.join(process.cwd(), "cache");
     const prefix = `response-tr-`;
 
@@ -250,17 +274,22 @@ export class TransactionsCacheDocuments {
       transactions = await retrieveTransactionsFromTradeRepublic();
     }
 
-    const supported = await getSupportedInstitutions();
-
     const transactionsMapped: Transaction[] = transactions?.map(
       (tx: any): Transaction => {
+        const amount = +tx.amount.value;
+        const isNegative = amount < 0;
+
         return {
           id: tx.id,
           amount: tx.amount.value,
+          type: isNegative
+            ? TransactionType.LIABILITY
+            : TransactionType.RECEIVABLE,
           date: tx.timestamp,
           description: tx.title,
           recipient: tx.title,
-          institution: supported.find((x) => x.id === institutionId)?.name,
+          institution: institution,
+          institutionId: institutionId,
         };
       },
     );

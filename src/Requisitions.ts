@@ -1,13 +1,11 @@
 import fs from "fs/promises";
 import http from "node:http";
-
 import { createRequisition } from "./requests/requisition";
 import { log } from "./utils";
 import { confirm } from "@inquirer/prompts";
 import open from "open";
 
-// interface for interacting with requisition cache
-export class RequisitionsCacheDocument {
+export class Requisitions {
   private requisitions = new Map<string, any>();
   private constructor(requisitions: Map<string, any>) {
     this.requisitions = requisitions;
@@ -20,15 +18,13 @@ export class RequisitionsCacheDocument {
         encoding: "utf-8",
       });
       const jsonRequisitions = JSON.parse(rawRequisitions);
-      return new RequisitionsCacheDocument(
-        new Map(Object.entries(jsonRequisitions)),
-      );
+      return new Requisitions(new Map(Object.entries(jsonRequisitions)));
     } catch (e) {
       await fs.mkdir(process.cwd() + "/cache", { recursive: true });
       await fs.writeFile(filePath, "", {
         encoding: "utf-8",
       });
-      return new RequisitionsCacheDocument(new Map());
+      return new Requisitions(new Map());
     }
   }
 

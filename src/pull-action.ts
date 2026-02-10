@@ -1,23 +1,22 @@
 import { checkbox, select } from "@inquirer/prompts";
 import { rl } from "./infra";
-import { RequisitionsCacheDocument } from "./RequisitionDocument";
-import { TransactionsCacheDocuments } from "./TransactionDocument";
+import { Requisitions } from "./Requisitions";
+import { Transactions } from "./Transactions";
 import getSupportedInstitutions from "./supported";
 import { listAccounts } from "./requests/list-accounts";
 
 export default async function pullAction() {
-  const transactionsCacheDocument = await TransactionsCacheDocuments.create();
+  const transactionsCacheDocument =
+    await Transactions.createUsingPotentiallyExisitingTransactions();
 
   await pullTransactionsIntoCache(transactionsCacheDocument);
 
-  await transactionsCacheDocument.persist();
+  await transactionsCacheDocument.writeToJsonFile();
 
   rl.close();
 }
 
-export async function pullTransactionsIntoCache(
-  transactionsDoc: TransactionsCacheDocuments,
-) {
+export async function pullTransactionsIntoCache(transactionsDoc: Transactions) {
   // const countryCode = await promptCountry();
 
   const institutions = await getSupportedInstitutions();
@@ -34,7 +33,7 @@ export async function pullTransactionsIntoCache(
     required: true,
   });
 
-  const requisitionsDocument = await RequisitionsCacheDocument.create();
+  const requisitionsDocument = await Requisitions.create();
 
   for (const insti of checkedInstitutions) {
     if (insti === "TRADE_REPUBLIC") {

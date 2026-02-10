@@ -1,5 +1,5 @@
 import { log } from "console";
-import { TransactionsCacheDocuments } from "./TransactionDocument";
+import { Transactions } from "./Transactions";
 import { Command } from "commander";
 import { rl } from "./infra";
 import { input } from "@inquirer/prompts";
@@ -8,7 +8,8 @@ const path = require("path");
 import supported from "./const/supported.json";
 
 export default async function spreadsheetAction() {
-  const transactionFile = await TransactionsCacheDocuments.create();
+  const transactionFile =
+    await Transactions.createUsingPotentiallyExisitingTransactions();
 
   log("Create Spreadsheet with the Data");
   const yearInput = await input({

@@ -1,4 +1,4 @@
-type SupportedInstitution = {
+type Institution = {
   id: string;
   name: string;
   bic: string;
