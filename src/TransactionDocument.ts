@@ -7,6 +7,7 @@ import path from "path";
 import { fileExists } from "./lib/file-exists";
 import { toSnakeCase } from "./lib/snake-case";
 import retrieveTransactionsFromTradeRepublic from "./traderepublic";
+import getSupportedInstitutions from "./supported";
 
 export class TransactionsCacheDocuments {
   private transactions: Transaction[] = [];
@@ -61,21 +62,6 @@ export class TransactionsCacheDocuments {
   }
 
   async persist() {
-    // const grouped = this.transactions.reduce(
-    //   (acc, transaction) => {
-    //     const institution = toSnakeCase(transaction.institution || "cash");
-    //     if (!acc[institution]) {
-    //       acc[institution] = [];
-    //     }
-    //     // delete transaction.institution;
-    //     acc[institution].push(transaction);
-    //     return acc;
-    //   },
-    //   {} as Record<string, Transaction[]>,
-    // );
-
-    // console.log(this.transactions.l)
-
     const serialized = JSON.stringify(this.transactions, null, 2);
     const filePath = process.cwd() + `/cache/transactions.json`;
     await fs.writeFile(filePath, serialized);
@@ -119,7 +105,7 @@ export class TransactionsCacheDocuments {
     } catch (err: Error | any) {
       log("Proceeding to fetch from API...");
       data = await listTransactionsRequest(
-        process.env.ACCESS,
+        process.env["GCL_ACCESS_TOKEN"],
         accountId,
         institutionId,
       );
@@ -147,7 +133,89 @@ export class TransactionsCacheDocuments {
     }
   }
 
-  async fetchTransactionsFromTradeRepublic() {
+  async fetchTransactionsRaiffeisen(
+    institutionId: string = "RAIFFEISEN_AT_RZBAATWW",
+    accountId: string,
+  ): Promise<void> {
+    console.log("RAIBA");
+    const cacheDir = path.join(process.cwd(), "cache");
+    const prefix = `response-${institutionId}-${new Date().toISOString().split("T")[0]}`;
+
+    let data: any;
+    try {
+      const files = await fs.readdir(cacheDir);
+      const matchingFiles = files.filter(
+        (f) => f.startsWith(prefix) && f.endsWith(".json"),
+      );
+      if (matchingFiles.length === 0) {
+        throw new Error("No cached response files found");
+      }
+      matchingFiles.sort((a, b) => {
+        const dateA = a.slice(prefix.length, prefix.length + 10);
+        const dateB = b.slice(prefix.length, prefix.length + 10);
+        return dateA.localeCompare(dateB);
+      });
+
+      const latestFile = matchingFiles[matchingFiles.length - 1];
+      const cachePath = path.join(cacheDir, latestFile);
+
+      data = await fs.readFile(cachePath, "utf8");
+
+      const fetchRegardless = await confirm({
+        message:
+          "There is a cached response - do you want to create a new fetch (only 4 per day)?",
+      });
+      if (fetchRegardless) {
+        throw new Error("Fetching regardless of cache");
+      }
+    } catch (err: Error | any) {
+      log("Proceeding to fetch from API...");
+      // For debugging purposes only:
+      const result = await fs.readFile(
+        process.cwd() +
+          `/cache/response-1b686203-f5b6-4198-b983-0b7e9bbd4085-RAIFFEISEN_AT_RZBAATWW-2026-02-09.json`,
+        { encoding: "utf-8" },
+      );
+
+      // data = JSON.parse(result);
+
+      data = await listTransactionsRequest(
+        process.env["GCL_ACCESS_TOKEN"],
+        accountId,
+        institutionId,
+      );
+    }
+    // pending would also be available, but for this scenario only booked ones are being used
+    const transactions = data.transactions.booked;
+    const supported = await getSupportedInstitutions();
+    const transactionsMapped: Transaction[] = transactions?.map(
+      (tx: any): Transaction => {
+        return {
+          id: tx.transactionId,
+          amount: tx.transactionAmount.amount,
+          date: tx.timestamp,
+          description: tx.title,
+          recipient: tx.title,
+          institution: supported.find((x) => x.id === institutionId)?.name,
+        };
+      },
+    );
+
+    for (const newTransaction of transactionsMapped) {
+      const existingTransactionWithSameId = this.transactions.find(
+        (existingTransaction) => {
+          return existingTransaction.id === newTransaction.id;
+        },
+      );
+      if (existingTransactionWithSameId === undefined) {
+        this.addTransaction(newTransaction);
+      }
+    }
+  }
+
+  async fetchTransactionsFromTradeRepublic(
+    institutionId: string = "TRADE_REPUBLIC",
+  ) {
     const cacheDir = path.join(process.cwd(), "cache");
     const prefix = `response-tr-`;
 
@@ -182,6 +250,8 @@ export class TransactionsCacheDocuments {
       transactions = await retrieveTransactionsFromTradeRepublic();
     }
 
+    const supported = await getSupportedInstitutions();
+
     const transactionsMapped: Transaction[] = transactions?.map(
       (tx: any): Transaction => {
         return {
@@ -190,7 +260,7 @@ export class TransactionsCacheDocuments {
           date: tx.timestamp,
           description: tx.title,
           recipient: tx.title,
-          institution: "Trade Republic",
+          institution: supported.find((x) => x.id === institutionId)?.name,
         };
       },
     );

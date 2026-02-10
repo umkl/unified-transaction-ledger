@@ -1,9 +1,9 @@
 declare namespace NodeJS {
   interface ProcessEnv {
-    SECRET_ID: string;
-    SECRET_KEY: string;
-    ACCESS: string;
-    REFRESH: string;
+    GCL_SECRET_ID: string;
+    GCL_SECRET_KEY: string;
+    GCL_ACCESS_TOKEN: string;
+    GCL_REFRESH_TOKEN: string;
     REQUISITION_ID: string;
     TR_PHONE: string;
     TR_PIN: string;

@@ -16,7 +16,7 @@ export default async function pullAction() {
 }
 
 export async function pullTransactionsIntoCache(
-  transactionsCacheDocument: TransactionsCacheDocuments,
+  transactionsDoc: TransactionsCacheDocuments,
 ) {
   // const countryCode = await promptCountry();
 
@@ -39,11 +39,19 @@ export async function pullTransactionsIntoCache(
   for (const insti of checkedInstitutions) {
     if (insti === "TRADE_REPUBLIC") {
       console.log("fetching data from trade republic");
-      await transactionsCacheDocument.fetchTransactionsFromTradeRepublic();
-    } else {
+      await transactionsDoc.fetchTransactionsFromTradeRepublic();
+    } else if (insti === "RAIFFEISEN_AT_RZBAATWW") {
+      const reqId = await requisitionsDocument.getRequisitionId(insti);
       const accounts = await listAccounts(
-        process.env.ACCESS,
-        await requisitionsDocument.getRequisitionId(insti),
+        process.env["GCL_ACCESS_TOKEN"],
+        reqId,
+      );
+      await transactionsDoc.fetchTransactionsRaiffeisen(insti, accounts[0]);
+    } else {
+      const reqId = await requisitionsDocument.getRequisitionId(insti);
+      const accounts = await listAccounts(
+        process.env["GCL_ACCESS_TOKEN"],
+        reqId,
       );
       console.log(
         `Found ${accounts.length} accounts for institution ${insti}.`,
@@ -53,10 +61,7 @@ export async function pullTransactionsIntoCache(
           "No accounts found for this institution, please reauthenticate",
         );
       }
-      await transactionsCacheDocument.fetchTransactionsForInstitution(
-        insti,
-        accounts[0],
-      );
+      await transactionsDoc.fetchTransactionsForInstitution(insti, accounts[0]);
     }
   }
 

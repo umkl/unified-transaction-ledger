@@ -48,7 +48,7 @@ export class RequisitionsCacheDocument {
     console.log(`Creating new requisition for institution: ${insti}`);
 
     const requisitionForInstitution: any = await createRequisition(
-      process.env.ACCESS,
+      process.env["GCL_ACCESS_TOKEN"],
       insti,
     );
 
