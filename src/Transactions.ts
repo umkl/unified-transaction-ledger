@@ -58,7 +58,6 @@ export class Transactions {
     }
 
     public getTransactions(year?: number, month?: number): Transaction[] {
-        console.log(this.transactions);
         return this.transactions.filter((t) => {
             const tDate = new Date(t.date);
             const matchesYear =

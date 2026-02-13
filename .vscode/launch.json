@@ -1,0 +1,16 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Launch Program (TS)",
+            "type": "node",
+            "request": "launch",
+            "program": "${workspaceFolder}/dist/cli.js",
+            "args": ["spreadsheet"],
+            "console": "integratedTerminal",
+            "sourceMaps": true,
+            "outFiles": ["${workspaceFolder}/dist/**/*.js"],
+            "skipFiles": ["<node_internals>/**"]
+        }
+    ]
+}
