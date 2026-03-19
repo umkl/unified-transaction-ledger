@@ -3,7 +3,8 @@
 	"version": "0.1.0",
 	"scripts": {
 		"build": "tsc --build",
-		"start": "tsc --build && node ./dist/cli.js"
+		"start": "tsc --build && node ./dist/cli.js",
+        "compile": "tsc --build && bun build ./dist/cli.js --compile --outfile ./bin/utl"
 	},
 	"bin": {
 		"utl": "./dist/cli.js"

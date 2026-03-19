@@ -8,8 +8,12 @@ import { excelAction } from "./excel";
 import cashAction from "./cash";
 import spreadsheetAction from "./spreadsheet-action";
 import pullAction from "./pull-action";
+import { loadEnv } from "./lib/env";
 
 program.name("utl").version(version);
+program.hook("preAction", async () => {
+  await loadEnv();
+});
 
 program.command("setup").action(setupAction);
 

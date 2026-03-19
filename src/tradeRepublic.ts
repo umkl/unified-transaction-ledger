@@ -3,14 +3,13 @@ import { log } from "console";
 import fs from "fs";
 import { trAuthRequest } from "./requests/trade-republic/authRequest";
 import { trVerifyCodeRequest } from "./requests/trade-republic/verifyCodeRequest";
-import { getEnvContent } from "./lib/env-content";
 import { writeFile } from "fs/promises";
 import { cleanJson } from "./lib/clean-json";
 import WebSocket from "ws";
+import { getConfigPath, readConfig, writeConfig } from "./lib/env";
 export default async function retrieveTransactionsFromTradeRepublic() {
-  let phone = process.env.TR_PHONE;
-
-  const envFileContent = await getEnvContent();
+  const config = await readConfig();
+  let phone = process.env.TR_PHONE ?? config.TR_PHONE;
 
   if (!phone) {
     phone = await input({
@@ -20,21 +19,12 @@ export default async function retrieveTransactionsFromTradeRepublic() {
       },
     });
 
-    await new Promise<void>((resolve, reject) => {
-      fs.writeFile(
-        process.cwd() + "/.env",
-        `${envFileContent}\nTR_PHONE=${phone}`,
-        (err) => {
-          if (err) {
-            reject(err);
-          }
-          resolve();
-        },
-      );
-    });
+    config.TR_PHONE = phone;
+    process.env.TR_PHONE = phone;
+    await writeConfig(config);
   }
 
-  let pin = process.env.TR_PIN;
+  let pin = process.env.TR_PIN ?? config.TR_PIN;
 
   if (!pin) {
     pin = await input({
@@ -47,24 +37,13 @@ export default async function retrieveTransactionsFromTradeRepublic() {
       },
     });
 
-    const envFileContent = await getEnvContent();
-
-    await new Promise<void>((resolve, reject) => {
-      fs.writeFile(
-        process.cwd() + "/.env",
-        `${envFileContent}\nTR_PIN=${pin}`,
-        (err) => {
-          if (err) {
-            reject(err);
-          }
-          resolve();
-        },
-      );
-    });
-    log("Updated/Created .env file with new credentials.");
+    config.TR_PIN = pin;
+    process.env.TR_PIN = pin;
+    await writeConfig(config);
+    log(`Updated config at ${getConfigPath()}`);
   }
 
-  let jwt = process.env.TR_JWT;
+  let jwt = process.env.TR_JWT ?? config.TR_JWT;
 
   console.log("JWT");
   console.log(jwt);
@@ -76,20 +55,9 @@ export default async function retrieveTransactionsFromTradeRepublic() {
   if (!jwt || fetchNewJWT) {
     jwt = await authenticate(pin, phone);
 
-    const envFileContent = await getEnvContent();
-
-    await new Promise<void>((resolve, reject) => {
-      fs.writeFile(
-        process.cwd() + "/.env",
-        `${envFileContent}\nTR_JWT=${jwt}`,
-        (err) => {
-          if (err) {
-            reject(err);
-          }
-          resolve();
-        },
-      );
-    });
+    config.TR_JWT = jwt;
+    process.env.TR_JWT = jwt;
+    await writeConfig(config);
   }
 
   try {

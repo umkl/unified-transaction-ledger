@@ -3,12 +3,12 @@ import { rl } from "./infra";
 import fetchNewTokenPair from "./requests/gcl-new-token-pair";
 import fs from "fs";
 import { log } from "./utils";
-import { loadEnv, persistEnv } from "./lib/env";
+import { getConfigPath, loadEnv, persistEnv } from "./lib/env";
 import { confirm } from "@inquirer/prompts";
 import fetchNewAccessToken from "./requests/gcl-new-access-token";
 
 export async function setupAction(): Promise<void> {
-  log("Reading current .env");
+  log(`Reading config at ${getConfigPath()}`);
   await loadEnv();
 
   const secretId = await getOrPromptEnvVar("GCL_SECRET_ID");
@@ -69,7 +69,9 @@ async function getOrPromptEnvVar(
     envVar ? `Found ${envPropName}: ${envVar}` : `${envPropName} wasn't found.`,
   );
   if (!envVar && isPromptNewDesired) {
-    return await rl.question(`Enter your ${envPropName}: `);
+    const value = await rl.question(`Enter your ${envPropName}: `);
+    process.env[envPropName] = value;
+    return value;
   }
   return envVar as string;
 }

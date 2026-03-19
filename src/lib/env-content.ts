@@ -1,15 +1,17 @@
 import { readFile } from "node:fs/promises";
-import path from "node:path";
 import { fileExists } from "./file-exists";
+import { getConfigPath } from "./env";
 
-export async function getEnvContent() {
+export async function getConfigContent() {
   try {
-    const filePath = path.join(process.cwd(), ".env");
+    const filePath = getConfigPath();
     if (!(await fileExists(filePath))) return "";
     const content = await readFile(filePath, "utf-8");
     return content;
   } catch (err) {
-    console.error("Could not read .env file:", err);
+    console.error("Could not read config file:", err);
     throw err;
   }
 }
+
+export const getEnvContent = getConfigContent;

@@ -1,50 +1,60 @@
-import fs from "fs";
-import { log } from "../utils";
+import fs from "node:fs/promises";
+import os from "node:os";
+import path from "node:path";
 
-export async function loadEnv() {
-  const doesEnvExist = await new Promise<boolean>((resolve) => {
-    fs.access(process.cwd() + "/.env", fs.constants.F_OK, (err) => {
-      resolve(!err);
-    });
-  });
+type Config = Record<string, string>;
 
-  if (doesEnvExist) {
-    const envFile = await new Promise<string>((resolve, reject) => {
-      fs.readFile(
-        process.cwd() + "/.env",
-        { encoding: "utf-8" },
-        (err, data: string) => {
-          if (err) reject(err);
-          resolve(data);
-        },
-      );
-    });
+const CONFIG_DIR = path.join(os.homedir(), ".config", "utl");
+const CONFIG_PATH = path.join(CONFIG_DIR, "config.json");
 
-    for (const line of envFile.split("\n")) {
-      const [key, value] = line.split("=");
-      process.env[key] = value;
+export function getConfigPath() {
+  return CONFIG_PATH;
+}
+
+export async function readConfig(): Promise<Config> {
+  try {
+    const raw = await fs.readFile(CONFIG_PATH, "utf-8");
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+      return {};
     }
+    const entries = Object.entries(parsed).filter(
+      ([, value]) => typeof value === "string",
+    );
+    return Object.fromEntries(entries) as Config;
+  } catch (err: any) {
+    if (err?.code === "ENOENT") {
+      return {};
+    }
+    throw err;
   }
 }
-export async function persistEnv(keysToPersist: string[] = []) {
-  const envContent = keysToPersist
-    .map((key) => {
-      const value = process.env[key] || "";
-      const assignment = `${key}=${value}`;
-      log(assignment);
-      return assignment;
-    })
-    .join("\n");
 
-  return new Promise<void>((resolve, reject) => {
-    fs.writeFile(
-      process.cwd() + "/.env",
-      envContent,
-      { encoding: "utf-8" },
-      (err) => {
-        if (err) reject(err);
-        resolve();
-      },
-    );
-  });
+export async function writeConfig(config: Config): Promise<void> {
+  await fs.mkdir(CONFIG_DIR, { recursive: true });
+  const serialized = JSON.stringify(config, null, 2) + "\n";
+  await fs.writeFile(CONFIG_PATH, serialized, { encoding: "utf-8", mode: 0o600 });
+  try {
+    await fs.chmod(CONFIG_PATH, 0o600);
+  } catch {
+    // Best-effort permissions for non-POSIX environments.
+  }
+}
+
+export async function loadEnv() {
+  const config = await readConfig();
+  for (const [key, value] of Object.entries(config)) {
+    process.env[key] = value;
+  }
+}
+
+export async function persistEnv(keysToPersist: string[] = []) {
+  const config = await readConfig();
+  for (const key of keysToPersist) {
+    const value = process.env[key];
+    if (typeof value === "string") {
+      config[key] = value;
+    }
+  }
+  await writeConfig(config);
 }
