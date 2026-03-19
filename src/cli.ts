@@ -12,7 +12,7 @@ import { loadEnv } from "./lib/env";
 
 program.name("utl").version(version);
 program.hook("preAction", async () => {
-  await loadEnv();
+    await loadEnv();
 });
 
 program.command("setup").action(setupAction);

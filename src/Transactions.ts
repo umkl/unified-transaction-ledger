@@ -9,6 +9,7 @@ import { toSnakeCase } from "./lib/snake-case";
 import retrieveTransactionsFromTradeRepublic from "./traderepublic";
 import getSupportedInstitutions from "./supported";
 import { TransactionType } from "./const/enums";
+import { getConfigPath } from "./lib/env";
 
 export class Transactions {
     private transactions: Transaction[] = [];
@@ -19,7 +20,8 @@ export class Transactions {
     public static async createUsingPotentiallyExisitingTransactions() {
         // reads from the json file
         const readTransactions: Transaction[] = [];
-        const filePath = process.cwd() + `/cache/transactions.json`;
+        const configDir = path.dirname(getConfigPath());
+        const filePath = path.join(configDir, "transactions.json");
         const doesFileExist = await fileExists(filePath);
 
         if (!doesFileExist) return new Transactions();
@@ -79,7 +81,9 @@ export class Transactions {
             null,
             2,
         );
-        const filePath = process.cwd() + `/cache/transactions.json`;
+        const configDir = path.dirname(getConfigPath());
+        const filePath = path.join(configDir, "transactions.json");
+        await fs.mkdir(configDir, { recursive: true });
         await fs.writeFile(filePath, serialized);
         log(`Persisted Transactions: ${this.transactions.length}`);
     }
@@ -88,7 +92,7 @@ export class Transactions {
         institutionId: string,
         accountId: string,
     ): Promise<void> {
-        const cacheDir = path.join(process.cwd(), "cache");
+        const cacheDir = path.dirname(getConfigPath());
         const prefix = `response-${accountId}-${institutionId}-`;
 
         let data: any;
@@ -159,7 +163,7 @@ export class Transactions {
             throw new Error("Institution wasn't found");
         }
 
-        const cacheDir = path.join(process.cwd(), "cache");
+        const cacheDir = path.dirname(getConfigPath());
         const prefix = `response-${institutionId}`;
 
         let data: any;
@@ -253,7 +257,7 @@ export class Transactions {
             throw new Error("Institution wasn't found");
         }
 
-        const cacheDir = path.join(process.cwd(), "cache");
+        const cacheDir = path.dirname(getConfigPath());
         const prefix = `response-${institutionId}`;
 
         let data: any;
@@ -345,7 +349,9 @@ export class Transactions {
         if (!institution) {
             throw new Error("Institution wasn't found");
         }
-        const cacheDir = path.join(process.cwd(), "cache");
+
+        const cacheDir = path.dirname(getConfigPath());
+
         const prefix = `response-tr-`;
 
         let transactions: any;

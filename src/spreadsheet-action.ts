@@ -1,11 +1,9 @@
 import { log } from "console";
 import { Transactions } from "./Transactions";
-import { Command } from "commander";
 import { rl } from "./infra";
 import { input } from "@inquirer/prompts";
 const fs = require("fs").promises;
 const path = require("path");
-import supported from "./const/supported.json";
 
 export default async function spreadsheetAction() {
     const transactionFile =

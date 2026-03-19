@@ -1,20 +1,35 @@
 import fs from "fs";
 
+const supported = [
+    {
+        id: "RAIFFEISEN_AT_RZBAATWW",
+        name: "Raiffeisen Bank",
+        bic: "RZBAATWW",
+        transaction_total_days: "730",
+        max_access_valid_for_days: "180",
+    },
+    {
+        id: "TRADE_REPUBLIC",
+        name: "Trade Republic",
+        countries: ["AT"],
+    },
+    {
+        id: "REVOLUT_REVOLT21",
+        name: "Revolut",
+        bic: "REVOLT21XXX",
+        transaction_total_days: "730",
+        max_access_valid_for_days: "180",
+    },
+] as unknown as Institution[];
+
 export default async function getSupportedInstitutions(
-  countryCode?: string,
+    countryCode?: string,
 ): Promise<Institution[]> {
-  const result = await new Promise<Institution[]>((resolve, reject) => {
-    fs.readFile(
-      `${process.cwd()}/src/const/supported.json`,
-      { encoding: "utf-8" },
-      (err, result: string) => {
-        if (err) reject(err);
-        resolve(JSON.parse(result));
-      },
-    );
-  });
-  if (countryCode) {
-    return result.filter((inst) => inst.countries?.includes(countryCode));
-  }
-  return result;
+    const result = await new Promise<Institution[]>((resolve) => {
+        resolve(supported);
+    });
+    if (countryCode) {
+        return result.filter((inst) => inst.countries?.includes(countryCode));
+    }
+    return result;
 }
