@@ -46,6 +46,7 @@ export async function getOrFetchNewToken(
     if (refreshToken) {
         try {
             const result = await fetchNewAccessToken(refreshToken);
+            process.env["GCL_ACCESS_TOKEN"] = result;
             return result;
         } catch (e) {
             log("Couldn't refresh using refresh token.");

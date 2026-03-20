@@ -1,31 +1,27 @@
 import { https } from "follow-redirects";
+import fs from "node:fs";
+import path from "node:path";
+import { getConfigPath } from "../lib/env";
 
 const options = {
     method: "GET",
-    hostname: "api.brokerize.com",
-    path: "/portfolios/W5fLksneuT3aO9YW/quotes",
+    hostname: "bankaccountdata.gocardless.com",
+    path: "/api/v2/accounts/00000000-0000-0000-0000-000000000000/balances/",
     headers: {
         Accept: "application/json",
-        Origin: "https://stock3.com",
-        "x-brkrz-client-id": "",
         Authorization: "",
     },
     maxRedirects: 20,
 };
 
-export async function brokerizePortfolioRequest(
-    portfolioId: string,
+export async function listBalancesRequest(
     accessToken: string,
-    clientId: string,
-    origin = "https://stock3.com",
+    accountId: string,
+    institutionId: string,
 ): Promise<any> {
-    return await new Promise(async (resolve, reject) => {
+    return await new Promise((resolve, reject) => {
         options.headers.Authorization = `Bearer ${accessToken}`;
-        options.headers["x-brkrz-client-id"] = clientId;
-        options.headers.Origin = origin;
-        options.path = `/portfolios/${portfolioId}/quotes`;
-
-        console.log(options);
+        options.path = `/api/v2/accounts/${accountId}/balances/`;
 
         const req = https.request(options, function (res) {
             const chunks: any = [];
@@ -38,14 +34,21 @@ export async function brokerizePortfolioRequest(
                 try {
                     const bodyData = Buffer.concat(chunks).toString("utf-8");
                     const json = JSON.parse(bodyData);
-
                     if (json["status_code"] >= 400) {
                         reject(new Error(`Error response: ${bodyData}`));
+                        return;
                     }
-
-                    console.log(json);
-
-                    resolve(json);
+                    const date = new Date().toISOString().split("T")[0];
+                    const configDir = path.dirname(getConfigPath());
+                    const cachePath = path.join(
+                        configDir,
+                        `balance-response-${accountId}-${institutionId}-${date}.json`,
+                    );
+                    fs.writeFile(
+                        cachePath,
+                        JSON.stringify(json, null, 2),
+                        () => resolve(json),
+                    );
                 } catch (err) {
                     reject(err);
                 }

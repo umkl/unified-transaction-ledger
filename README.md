@@ -48,16 +48,27 @@ The transactions are managed using the TransactionCacheDocuments class - this cl
 
 The user wants to fetch all the transactions from the past 30 days -> use the `setup` command to get an according `access token` -> use `pull` to load the transactions into a response file and a transactions file -> use `spreadsheet` to generate an spreasheet with all transactions in that time frame.
 
-## Outlook
-
-- add balance fetch
-    - flatex
-    -
-
 ## Balance
 
-Datetime
+creates snapshots and stores them into a daily snapshot file
 
+### daily snapshot
+
+- date: Date
+- balances: BankBalance[]
+- totalBalance: number;
+
+### bank balance
+
+- bankId
+- balance
+- currency
+
+## Balance Export
+
+Creates a csv spreadsheet with all bank account balances grouped by date sorted ascendantly with the following columns:
+
+- date as string (DD-MM-YY)
 - Trade Republic Cash
 - Trade Republic Portfolio
 - Flatex Cash

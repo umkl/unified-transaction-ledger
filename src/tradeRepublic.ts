@@ -294,7 +294,7 @@ export async function fetchAllTransactions(token: string) {
     });
 }
 
-export async function fetchAccountInformation() {
+export async function fetchAccountInformation(): Promise<any> {
     const config = await readConfig();
     let phone = process.env.TR_PHONE ?? config.TR_PHONE;
 
@@ -498,6 +498,10 @@ export async function fetchAccountInformation() {
                 };
 
                 ws.close();
+
+                console.log("REESULT:");
+                console.log(JSON.stringify(result));
+
                 resolve(result);
             } catch (err) {
                 ws.close();

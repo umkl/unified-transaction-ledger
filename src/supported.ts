@@ -1,5 +1,3 @@
-import fs from "fs";
-
 const supported = [
     {
         id: "RAIFFEISEN_AT_RZBAATWW",
