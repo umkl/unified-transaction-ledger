@@ -40,12 +40,12 @@ export default async function spreadsheetAction() {
 
     const transactions = transactionFile.getTransactions(year, month);
 
-    const headers = Object.keys(transactions[0] || {}).join(",");
-    const rows = transactions.map((t) => Object.values(t).join(","));
-    const csv = [headers, ...rows].join("\n");
+    const csv = transactionFile.toCSVLines(transactions).join("\n");
 
-    const outputPath = path.join(process.cwd(), "all-transactions.csv");
-    await fs.writeFile(outputPath, csv, "utf-8");
+    const csvWithBOM = "\ufeff" + csv;
+
+    const outputPath = path.join(process.cwd(), "transactions.csv");
+    await fs.writeFile(outputPath, csvWithBOM, "utf-8");
     log(`Transactions written to ${outputPath}`);
     rl.close();
 }

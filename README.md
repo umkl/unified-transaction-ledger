@@ -47,3 +47,21 @@ The transactions are managed using the TransactionCacheDocuments class - this cl
 ### Example
 
 The user wants to fetch all the transactions from the past 30 days -> use the `setup` command to get an according `access token` -> use `pull` to load the transactions into a response file and a transactions file -> use `spreadsheet` to generate an spreasheet with all transactions in that time frame.
+
+## Outlook
+
+- add balance fetch
+    - flatex
+    -
+
+## Balance
+
+Datetime
+
+- Trade Republic Cash
+- Trade Republic Portfolio
+- Flatex Cash
+- Flatex Portfolio
+- Raiffeisen Cash
+- Revolut Cash
+- N26 Business Cash

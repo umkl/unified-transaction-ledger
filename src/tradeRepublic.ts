@@ -293,3 +293,221 @@ export async function fetchAllTransactions(token: string) {
         });
     });
 }
+
+export async function fetchAccountInformation() {
+    const config = await readConfig();
+    let phone = process.env.TR_PHONE ?? config.TR_PHONE;
+
+    if (!phone) {
+        phone = await input({
+            message: "Enter your phone number:",
+            validate: (input) => {
+                return true;
+            },
+        });
+
+        config.TR_PHONE = phone;
+        process.env.TR_PHONE = phone;
+        await writeConfig(config);
+    }
+
+    let pin = process.env.TR_PIN ?? config.TR_PIN;
+
+    if (!pin) {
+        pin = await input({
+            message: "Enter your PIN (4 digits):",
+            validate: (input) => {
+                if (input.length !== 4) {
+                    return "Please provide a PIN with a length of 4 digits";
+                }
+                return true;
+            },
+        });
+
+        config.TR_PIN = pin;
+        process.env.TR_PIN = pin;
+        await writeConfig(config);
+        log(`Updated config at ${getConfigPath()}`);
+    }
+
+    let jwt = config.TR_JWT;
+
+    console.log("JWT");
+    console.log(jwt);
+
+    const fetchNewJWT = await confirm({
+        message: "Do you want to fetch a new JWT?",
+    });
+
+    if (!jwt || fetchNewJWT) {
+        jwt = await authenticate(pin, phone);
+
+        config.TR_JWT = jwt;
+        process.env.TR_JWT = jwt;
+        await writeConfig(config);
+    }
+
+    const ws = new WebSocket("wss://api.traderepublic.com");
+    let messageId = 0;
+
+    const extractJson = (msg: string) => {
+        const firstBrace = msg.indexOf("{");
+        const firstBracket = msg.indexOf("[");
+        let start = -1;
+        let end = -1;
+
+        if (
+            firstBracket !== -1 &&
+            (firstBrace === -1 || firstBracket < firstBrace)
+        ) {
+            start = firstBracket;
+            end = msg.lastIndexOf("]");
+        } else if (firstBrace !== -1) {
+            start = firstBrace;
+            end = msg.lastIndexOf("}");
+        }
+
+        if (start !== -1 && end !== -1 && end > start) {
+            return msg.slice(start, end + 1);
+        }
+        return "{}";
+    };
+
+    const waitForMessage = (timeoutMs = 5000) =>
+        new Promise<string>((resolve, reject) => {
+            const timeout = setTimeout(() => {
+                reject(
+                    new Error(
+                        `Timeout waiting for WS message (${timeoutMs}ms)`,
+                    ),
+                );
+            }, timeoutMs);
+
+            ws.once("message", (data) => {
+                clearTimeout(timeout);
+                const msg = data.toString();
+                try {
+                    const cleanedMsg = extractJson(msg);
+                    JSON.parse(cleanedMsg);
+                } catch {
+                    // ignore parse errors for non-JSON frames
+                }
+                resolve(msg);
+            });
+        });
+
+    return new Promise((resolve, reject) => {
+        ws.addEventListener("open", async () => {
+            try {
+                const localeConfig = {
+                    locale: "en",
+                    platformId: "webtrading",
+                    platformVersion: "chrome - 148.0.0",
+                    clientId: "app.traderepublic.com",
+                    clientVersion: "13.40.5",
+                };
+
+                const connectFrame = `connect 34 ${JSON.stringify(localeConfig)}`;
+                console.log(`[TR] ws -> ${connectFrame}`);
+                ws.send(connectFrame);
+                await waitForMessage();
+
+                const sendSub = async (payload: Record<string, unknown>) => {
+                    messageId++;
+                    const subFrame = `sub ${messageId} ${JSON.stringify(payload)}`;
+                    console.log(`[TR] ws -> ${subFrame}`);
+                    ws.send(subFrame);
+                    const subResponse: any = await waitForMessage();
+                    ws.send(`unsub ${messageId}`);
+                    const cleaned = extractJson(subResponse);
+                    const jsonData = JSON.parse(cleaned);
+                    if ((jsonData as any)?.errors?.length > 0) {
+                        throw new Error(
+                            JSON.stringify((jsonData as any).errors),
+                        );
+                    }
+                    return { jsonData, raw: subResponse as string };
+                };
+
+                const accountPairsResponse = await sendSub({
+                    type: "accountPairs",
+                    token: jwt,
+                });
+
+                const secAccNo = (accountPairsResponse.jsonData as any)
+                    ?.accounts?.[0]?.securitiesAccountNumber;
+                if (!secAccNo) {
+                    throw new Error(
+                        "Missing securitiesAccountNumber in accountPairs response",
+                    );
+                }
+
+                const cashResponse = await sendSub({
+                    type: "cash",
+                    token: jwt,
+                });
+
+                console.log("[TR] account cash (raw)");
+                console.log(cashResponse.raw);
+                console.log("[TR] account cash (parsed)");
+                console.log(JSON.stringify(cashResponse.jsonData, null, 2));
+
+                const portfolioResponse = await sendSub({
+                    type: "compactPortfolioByTypeV2",
+                    secAccNo,
+                    token: jwt,
+                });
+
+                console.log("[TR] account portfolio (parsed)");
+                console.log(
+                    JSON.stringify(portfolioResponse.jsonData, null, 2),
+                );
+
+                const positions =
+                    (portfolioResponse.jsonData as any)?.categories?.flatMap(
+                        (category: any) => category.positions || [],
+                    ) || [];
+
+                const tickerResults: Record<string, unknown> = {};
+                let portfolioValue = 0;
+                for (const position of positions) {
+                    const isin = position?.isin;
+                    if (!isin) continue;
+                    const tickerId = `${isin}.LSX`;
+                    const tickerResponse = await sendSub({
+                        type: "ticker",
+                        id: tickerId,
+                    });
+                    tickerResults[isin] = tickerResponse.jsonData;
+                    const prePrice = Number(
+                        (tickerResponse.jsonData as any)?.pre?.price ?? 0,
+                    );
+                    const size = Number(position?.netSize ?? 0);
+                    if (!Number.isNaN(prePrice) && !Number.isNaN(size)) {
+                        portfolioValue += prePrice * size;
+                    }
+                }
+
+                const result = {
+                    cash: cashResponse.jsonData,
+                    portfolio: {
+                        positions,
+                        tickers: tickerResults,
+                        value: portfolioValue,
+                    },
+                };
+
+                ws.close();
+                resolve(result);
+            } catch (err) {
+                ws.close();
+                reject(err);
+            }
+        });
+
+        ws.addEventListener("error", (err) => {
+            console.error("WebSocket Fehler:", err);
+            reject(err);
+        });
+    });
+}

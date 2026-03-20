@@ -1,0 +1,785 @@
+3 A {
+    "status": "CREATED",
+    "hasInvested": true,
+    "firstCashReceived": true,
+    "firstPortfolioUsage": true,
+    "bitgoTermsRequired": false,
+    "proprietaryTradingTermsRequired": false,
+    "reKycRequired": [],
+    "sourceOfFundsRequired": false,
+    "tradingBlockedOnIdentification": false,
+    "bondsTermsRequired": true,
+    "privateFundTermsRequired": true
+}	1774022691.9317966
+
+
+19 A {
+    "categories": [
+        {
+            "categoryType": "stocksAndETFs",
+            "positions": [
+                {
+                    "isin": "US0378331005",
+                    "averageBuyIn": {
+                        "value": 197.4270,
+                        "currency": "EUR"
+                    },
+                    "netSize": 12.560825,
+                    "virtualSize": 12.560825,
+                    "status": "ACTIVE",
+                    "instrumentType": "stock",
+                    "name": "Apple",
+                    "derivativeInfo": null,
+                    "bondInfo": null,
+                    "imageId": "logos/US0378331005/v2"
+                },
+                {
+                    "isin": "US37637K1088",
+                    "averageBuyIn": {
+                        "value": 40.3000,
+                        "currency": "EUR"
+                    },
+                    "netSize": 24.813895,
+                    "virtualSize": 24.813895,
+                    "status": "ACTIVE",
+                    "instrumentType": "stock",
+                    "name": "GitLab",
+                    "derivativeInfo": null,
+                    "bondInfo": null,
+                    "imageId": "logos/US37637K1088/v2"
+                },
+                {
+                    "isin": "US6541061031",
+                    "averageBuyIn": {
+                        "value": 68.8800,
+                        "currency": "EUR"
+                    },
+                    "netSize": 7.244483,
+                    "virtualSize": 7.244483,
+                    "status": "ACTIVE",
+                    "instrumentType": "stock",
+                    "name": "Nike (B)",
+                    "derivativeInfo": null,
+                    "bondInfo": null,
+                    "imageId": "logos/US6541061031/v2"
+                }
+            ]
+        }
+    ]
+}	1774022691.9642355
+
+
+
+11 A {
+    "results": [
+        {
+            "isin": "US037833BH21",
+            "name": "May 2045",
+            "tags": [
+                {
+                    "type": "country",
+                    "id": "US",
+                    "name": "USA"
+                },
+                {
+                    "type": "sector",
+                    "id": "computers",
+                    "name": "Computers & Network"
+                },
+                {
+                    "type": "bond_issuer_type",
+                    "id": "corporate",
+                    "name": "Corporate"
+                },
+                {
+                    "type": "currency",
+                    "id": "usd",
+                    "name": "USD"
+                },
+                {
+                    "type": "time_to_maturity",
+                    "id": "more_than_ten_years",
+                    "name": "More than 10 years"
+                }
+            ],
+            "type": "instrument",
+            "instrumentType": "bond",
+            "instrumentCategory": "fixedIncome",
+            "searchSubtitle": "Apple · USD",
+            "derivativeProductCategories": [],
+            "bondIssuerName": "Apple",
+            "imageId": "logos/US0378331005/v2",
+            "hasCfd": false
+        }
+    ],
+    "resultCount": 842,
+    "correlationId": "2e109a53-ea09-4a05-816e-82f4ba7b2d3d"
+}	1774023562.380521
+
+
+
+
+87 A {
+    "active": true,
+    "exchangeIds": [
+        "LSX",
+        "TDG",
+        "XETR",
+        "XFRA",
+        "XMIL",
+        "XWAR",
+        "XNAS",
+        "XSWX",
+        "TIB"
+    ],
+    "exchanges": [
+        {
+            "slug": "LSX",
+            "active": true,
+            "nameAtExchange": "APPLE COMPUTER INC.",
+            "symbolAtExchange": "APC",
+            "band": 6,
+            "firstSeen": 1547548103636,
+            "lastSeen": 1774023081972,
+            "firstTradingDay": null,
+            "lastTradingDay": null,
+            "tradingTimes": null,
+            "fractionalTrading": {
+                "minOrderSize": "0.0000010",
+                "maxOrderSize": null,
+                "stepSize": "0.0000010",
+                "orderAmountLimitCurrency": "EUR",
+                "minOrderAmount": "1",
+                "maxOrderAmount": null
+            },
+            "settlementRoute": "DEFAULT",
+            "weight": null
+        },
+        {
+            "slug": "TDG",
+            "active": true,
+            "nameAtExchange": "Apple Inc.",
+            "symbolAtExchange": "APC",
+            "band": null,
+            "firstSeen": 1585287001108,
+            "lastSeen": 1773979231328,
+            "firstTradingDay": null,
+            "lastTradingDay": null,
+            "tradingTimes": null,
+            "fractionalTrading": null,
+            "settlementRoute": "DEFAULT",
+            "weight": null
+        },
+        {
+            "slug": "XETR",
+            "active": true,
+            "nameAtExchange": "",
+            "symbolAtExchange": "APC",
+            "band": null,
+            "firstSeen": 1765986710224,
+            "lastSeen": 1769496625376,
+            "firstTradingDay": null,
+            "lastTradingDay": null,
+            "tradingTimes": null,
+            "fractionalTrading": {
+                "minOrderSize": "0.0000010",
+                "maxOrderSize": null,
+                "stepSize": "0.0000010",
+                "orderAmountLimitCurrency": "EUR",
+                "minOrderAmount": "1",
+                "maxOrderAmount": null
+            },
+            "settlementRoute": "DEFAULT",
+            "weight": null
+        },
+        {
+            "slug": "XFRA",
+            "active": true,
+            "nameAtExchange": "",
+            "symbolAtExchange": "FAPC",
+            "band": null,
+            "firstSeen": 1766040661269,
+            "lastSeen": 1769496628723,
+            "firstTradingDay": null,
+            "lastTradingDay": null,
+            "tradingTimes": null,
+            "fractionalTrading": {
+                "minOrderSize": "0.0000010",
+                "maxOrderSize": null,
+                "stepSize": "0.0000010",
+                "orderAmountLimitCurrency": "EUR",
+                "minOrderAmount": "1",
+                "maxOrderAmount": null
+            },
+            "settlementRoute": "DEFAULT",
+            "weight": null
+        },
+        {
+            "slug": "XMIL",
+            "active": true,
+            "nameAtExchange": "",
+            "symbolAtExchange": "1AAPL",
+            "band": null,
+            "firstSeen": 1769238394377,
+            "lastSeen": 1769497629344,
+            "firstTradingDay": null,
+            "lastTradingDay": null,
+            "tradingTimes": null,
+            "fractionalTrading": {
+                "minOrderSize": "0.0000010",
+                "maxOrderSize": null,
+                "stepSize": "0.0000010",
+                "orderAmountLimitCurrency": "EUR",
+                "minOrderAmount": "1",
+                "maxOrderAmount": null
+            },
+            "settlementRoute": "DEFAULT",
+            "weight": null
+        },
+        {
+            "slug": "XWAR",
+            "active": true,
+            "nameAtExchange": "",
+            "symbolAtExchange": "AAPL",
+            "band": null,
+            "firstSeen": 1766040976102,
+            "lastSeen": 1769496928205,
+            "firstTradingDay": null,
+            "lastTradingDay": null,
+            "tradingTimes": null,
+            "fractionalTrading": {
+                "minOrderSize": "0.0000010",
+                "maxOrderSize": null,
+                "stepSize": "0.0000010",
+                "orderAmountLimitCurrency": "EUR",
+                "minOrderAmount": "1",
+                "maxOrderAmount": null
+            },
+            "settlementRoute": "DEFAULT",
+            "weight": null
+        },
+        {
+            "slug": "XNAS",
+            "active": true,
+            "nameAtExchange": "",
+            "symbolAtExchange": "AAPL",
+            "band": null,
+            "firstSeen": 1766042105689,
+            "lastSeen": 1769498013615,
+            "firstTradingDay": null,
+            "lastTradingDay": null,
+            "tradingTimes": null,
+            "fractionalTrading": {
+                "minOrderSize": "0.0000010",
+                "maxOrderSize": null,
+                "stepSize": "0.0000010",
+                "orderAmountLimitCurrency": "EUR",
+                "minOrderAmount": "1",
+                "maxOrderAmount": null
+            },
+            "settlementRoute": "DEFAULT",
+            "weight": null
+        },
+        {
+            "slug": "XSWX",
+            "active": true,
+            "nameAtExchange": "",
+            "symbolAtExchange": "AAPL",
+            "band": null,
+            "firstSeen": 1769227564385,
+            "lastSeen": 1769486728250,
+            "firstTradingDay": null,
+            "lastTradingDay": null,
+            "tradingTimes": null,
+            "fractionalTrading": {
+                "minOrderSize": "0.0000010",
+                "maxOrderSize": null,
+                "stepSize": "0.0000010",
+                "orderAmountLimitCurrency": "EUR",
+                "minOrderAmount": "1",
+                "maxOrderAmount": null
+            },
+            "settlementRoute": "DEFAULT",
+            "weight": null
+        },
+        {
+            "slug": "TIB",
+            "active": true,
+            "nameAtExchange": "APPLE INC",
+            "symbolAtExchange": "US0378331005",
+            "band": null,
+            "firstSeen": 1709139968787,
+            "lastSeen": 1774022485788,
+            "firstTradingDay": null,
+            "lastTradingDay": null,
+            "tradingTimes": null,
+            "fractionalTrading": {
+                "minOrderSize": "0.0000010",
+                "maxOrderSize": null,
+                "stepSize": "0.0000010",
+                "orderAmountLimitCurrency": "EUR",
+                "minOrderAmount": "1",
+                "maxOrderAmount": null
+            },
+            "settlementRoute": "DEFAULT",
+            "weight": null
+        }
+    ],
+    "primaryExchange": {
+        "slug": "XNAS",
+        "active": true,
+        "nameAtExchange": "",
+        "symbolAtExchange": "AAPL",
+        "band": null,
+        "firstSeen": 1766042105689,
+        "lastSeen": 1769498013615,
+        "firstTradingDay": null,
+        "lastTradingDay": null,
+        "tradingTimes": null,
+        "fractionalTrading": {
+            "minOrderSize": "0.0000010",
+            "maxOrderSize": null,
+            "stepSize": "0.0000010",
+            "orderAmountLimitCurrency": "EUR",
+            "minOrderAmount": "1",
+            "maxOrderAmount": null
+        },
+        "settlementRoute": "DEFAULT",
+        "weight": null
+    },
+    "jurisdictions": {
+        "DE": {
+            "active": true,
+            "kidLink": null,
+            "kidRequired": false,
+            "savable": true,
+            "fractionalTradingAllowed": true,
+            "proprietaryTradable": true,
+            "usesWeightsForExchanges": false,
+            "weights": null
+        },
+        "AT": {
+            "active": true,
+            "kidLink": null,
+            "kidRequired": false,
+            "savable": true,
+            "fractionalTradingAllowed": true,
+            "proprietaryTradable": true,
+            "usesWeightsForExchanges": false,
+            "weights": null
+        },
+        "FR": {
+            "active": true,
+            "kidLink": null,
+            "kidRequired": false,
+            "savable": true,
+            "fractionalTradingAllowed": true,
+            "proprietaryTradable": true,
+            "usesWeightsForExchanges": false,
+            "weights": null
+        },
+        "SI": {
+            "active": true,
+            "kidLink": null,
+            "kidRequired": false,
+            "savable": true,
+            "fractionalTradingAllowed": true,
+            "proprietaryTradable": true,
+            "usesWeightsForExchanges": false,
+            "weights": null
+        },
+        "PL": {
+            "active": true,
+            "kidLink": null,
+            "kidRequired": false,
+            "savable": true,
+            "fractionalTradingAllowed": true,
+            "proprietaryTradable": true,
+            "usesWeightsForExchanges": false,
+            "weights": null
+        },
+        "NL": {
+            "active": true,
+            "kidLink": null,
+            "kidRequired": false,
+            "savable": true,
+            "fractionalTradingAllowed": true,
+            "proprietaryTradable": true,
+            "usesWeightsForExchanges": false,
+            "weights": null
+        },
+        "IE": {
+            "active": true,
+            "kidLink": null,
+            "kidRequired": false,
+            "savable": true,
+            "fractionalTradingAllowed": true,
+            "proprietaryTradable": true,
+            "usesWeightsForExchanges": false,
+            "weights": null
+        },
+        "LT": {
+            "active": true,
+            "kidLink": null,
+            "kidRequired": false,
+            "savable": true,
+            "fractionalTradingAllowed": true,
+            "proprietaryTradable": true,
+            "usesWeightsForExchanges": false,
+            "weights": null
+        },
+        "ES": {
+            "active": true,
+            "kidLink": null,
+            "kidRequired": false,
+            "savable": true,
+            "fractionalTradingAllowed": true,
+            "proprietaryTradable": true,
+            "usesWeightsForExchanges": false,
+            "weights": null
+        },
+        "BE": {
+            "active": true,
+            "kidLink": null,
+            "kidRequired": false,
+            "savable": true,
+            "fractionalTradingAllowed": true,
+            "proprietaryTradable": true,
+            "usesWeightsForExchanges": false,
+            "weights": null
+        },
+        "EE": {
+            "active": true,
+            "kidLink": null,
+            "kidRequired": false,
+            "savable": true,
+            "fractionalTradingAllowed": true,
+            "proprietaryTradable": true,
+            "usesWeightsForExchanges": false,
+            "weights": null
+        },
+        "LV": {
+            "active": true,
+            "kidLink": null,
+            "kidRequired": false,
+            "savable": true,
+            "fractionalTradingAllowed": true,
+            "proprietaryTradable": true,
+            "usesWeightsForExchanges": false,
+            "weights": null
+        },
+        "SK": {
+            "active": true,
+            "kidLink": null,
+            "kidRequired": false,
+            "savable": true,
+            "fractionalTradingAllowed": true,
+            "proprietaryTradable": true,
+            "usesWeightsForExchanges": false,
+            "weights": null
+        },
+        "PT": {
+            "active": true,
+            "kidLink": null,
+            "kidRequired": false,
+            "savable": true,
+            "fractionalTradingAllowed": true,
+            "proprietaryTradable": true,
+            "usesWeightsForExchanges": false,
+            "weights": null
+        },
+        "LU": {
+            "active": true,
+            "kidLink": null,
+            "kidRequired": false,
+            "savable": true,
+            "fractionalTradingAllowed": true,
+            "proprietaryTradable": true,
+            "usesWeightsForExchanges": false,
+            "weights": null
+        },
+        "FI": {
+            "active": true,
+            "kidLink": null,
+            "kidRequired": false,
+            "savable": true,
+            "fractionalTradingAllowed": true,
+            "proprietaryTradable": true,
+            "usesWeightsForExchanges": false,
+            "weights": null
+        },
+        "IT": {
+            "active": true,
+            "kidLink": null,
+            "kidRequired": false,
+            "savable": true,
+            "fractionalTradingAllowed": true,
+            "proprietaryTradable": true,
+            "usesWeightsForExchanges": false,
+            "weights": null
+        },
+        "GR": {
+            "active": true,
+            "kidLink": null,
+            "kidRequired": false,
+            "savable": true,
+            "fractionalTradingAllowed": true,
+            "proprietaryTradable": true,
+            "usesWeightsForExchanges": false,
+            "weights": null
+        }
+    },
+    "dividends": [],
+    "splits": [
+        {
+            "id": "67463a8b-cd5e-48ea-babd-53f18c951bb5",
+            "date": 1402272000000,
+            "initial": 1,
+            "final": 7
+        },
+        {
+            "id": "8437e1fb-2366-4c3c-8382-4080b6bcf858",
+            "date": 1598659200000,
+            "initial": 1,
+            "final": 4
+        }
+    ],
+    "cfi": "ESXXXX",
+    "name": "APPLE INC.",
+    "typeId": "stock",
+    "legalTypeId": null,
+    "wkn": "865985",
+    "legacyTypeChar": "S",
+    "isin": "US0378331005",
+    "priceFactor": 1,
+    "shortName": "Apple",
+    "nextGenName": "Apple",
+    "alarmsName": "Apple",
+    "homeSymbol": "APC",
+    "intlSymbol": "AAPL",
+    "homeNsin": "000000000",
+    "tags": [
+        {
+            "type": "sector",
+            "id": "computers",
+            "name": "Computers & Network",
+            "icon": "https://assets.traderepublic.com/v2/img/icon/SectorComputers.png"
+        },
+        {
+            "type": "country",
+            "id": "US",
+            "name": "USA",
+            "icon": "https://assets.traderepublic.com/v2/img/icon/flags_square/us.png"
+        },
+        {
+            "type": "index",
+            "id": "dowjones",
+            "name": "Dow Jones",
+            "icon": "https://assets.traderepublic.com/v2/img/icon/index_US.png"
+        },
+        {
+            "type": "index",
+            "id": "nasdaq",
+            "name": "NASDAQ",
+            "icon": "https://assets.traderepublic.com/v2/img/icon/index_US.png"
+        },
+        {
+            "type": "index",
+            "id": "sp500",
+            "name": "SP500",
+            "icon": "https://assets.traderepublic.com/v2/img/icon/index_US.png"
+        }
+    ],
+    "derivativeProductCount": {
+        "knockOutProduct": 3379,
+        "factorCertificate": 342,
+        "vanillaWarrant": 3039
+    },
+    "derivativeProductCategories": [
+        "knockOutProduct",
+        "factorCertificate",
+        "vanillaWarrant"
+    ],
+    "company": {
+        "name": "Apple",
+        "description": null,
+        "ipoDate": 492739200000,
+        "countryOfOrigin": "US"
+    },
+    "marketCap": {
+        "value": "3198532509356.78",
+        "currencyId": "EUR"
+    },
+    "lastDividend": null,
+    "shareType": "common",
+    "custodyType": "gsv",
+    "custodyCountry": null,
+    "tradingVenue": "HAMN",
+    "kidRequired": false,
+    "kidLink": null,
+    "tradable": true,
+    "fundInfo": null,
+    "privateFundInfo": null,
+    "mutualFundInfo": null,
+    "derivativeInfo": null,
+    "bondInfo": null,
+    "targetMarket": {
+        "investorExperience": "basicKnowledge",
+        "investorType": "retail"
+    },
+    "savable": true,
+    "fractionalTradingAllowed": true,
+    "proprietaryTradable": true,
+    "issuer": null,
+    "issuerDisplayName": null,
+    "issuerImageId": null,
+    "notionalCurrency": null,
+    "additionalBuyWarning": null,
+    "warningMessage": null,
+    "description": null,
+    "noTradeVolume": false,
+    "additionalBuyWarnings": null,
+    "warningMessages": null,
+    "descriptions": null,
+    "usesWeightsForExchanges": false,
+    "imageId": "logos/US0378331005/v2",
+    "exchangeStatuses": {
+        "LSX": "ACTIVE"
+    },
+    "cfdInfo": {
+        "lastTradingDay": null,
+        "maturity": null,
+        "corporateActionDate": null,
+        "dividendDate": null,
+        "instrumentStatus": "ACTIVE",
+        "shortEnabled": true,
+        "maxLeverage": 5.000000,
+        "minLimitOrderDistance": 0.000000,
+        "minStopOrderDistance": 0.000000,
+        "mifidEntryCost": 0.000000,
+        "mifidExitCost": 0.000000,
+        "interestRate": 0.019330,
+        "interestPremium": 0.045000,
+        "repoRate": 0.000000,
+        "currency": "EUR",
+        "issuerCode": "SOC_GEN",
+        "underlyingCurrency": "USD",
+        "underlyingCategory": "STOCK_UNDERLYING",
+        "jurisdictions": {
+            "LV": {
+                "active": true,
+                "kidLink": "https://socgen-leverage-trading.traderepublic.com.cry.sgmarkets.com/fortune-web-server/static/fortune-nife/documents/kid/CFD_AAPL_UW_EUR_OTC-TRADEREPUBLIC_TRADER-LONG/KID_LV_CFD_TR/CBLV/LATVIAN",
+                "longKidLink": "https://socgen-leverage-trading.traderepublic.com.cry.sgmarkets.com/fortune-web-server/static/fortune-nife/documents/kid/CFD_AAPL_UW_EUR_OTC-TRADEREPUBLIC_TRADER-LONG/KID_LV_CFD_TR/CBLV/LATVIAN",
+                "shortKidLink": "https://socgen-leverage-trading.traderepublic.com.cry.sgmarkets.com/fortune-web-server/static/fortune-nife/documents/kid/CFD_AAPL_UW_EUR_OTC-TRADEREPUBLIC_TRADER-SHORT/KID_LV_CFD_TR/CBLV/LATVIAN",
+                "kidRequired": true,
+                "savable": false,
+                "fractionalTradingAllowed": false
+            },
+            "LT": {
+                "active": true,
+                "kidLink": "https://socgen-leverage-trading.traderepublic.com.cry.sgmarkets.com/fortune-web-server/static/fortune-nife/documents/kid/CFD_AAPL_UW_EUR_OTC-TRADEREPUBLIC_TRADER-LONG/KID_LT_CFD_TR/CBLT/LITHUANIAN",
+                "longKidLink": "https://socgen-leverage-trading.traderepublic.com.cry.sgmarkets.com/fortune-web-server/static/fortune-nife/documents/kid/CFD_AAPL_UW_EUR_OTC-TRADEREPUBLIC_TRADER-LONG/KID_LT_CFD_TR/CBLT/LITHUANIAN",
+                "shortKidLink": "https://socgen-leverage-trading.traderepublic.com.cry.sgmarkets.com/fortune-web-server/static/fortune-nife/documents/kid/CFD_AAPL_UW_EUR_OTC-TRADEREPUBLIC_TRADER-SHORT/KID_LT_CFD_TR/CBLT/LITHUANIAN",
+                "kidRequired": true,
+                "savable": false,
+                "fractionalTradingAllowed": false
+            },
+            "EE": {
+                "active": true,
+                "kidLink": "https://socgen-leverage-trading.traderepublic.com.cry.sgmarkets.com/fortune-web-server/static/fortune-nife/documents/kid/CFD_AAPL_UW_EUR_OTC-TRADEREPUBLIC_TRADER-LONG/KID_ET_CFD_TR/CBET/ESTONIAN",
+                "longKidLink": "https://socgen-leverage-trading.traderepublic.com.cry.sgmarkets.com/fortune-web-server/static/fortune-nife/documents/kid/CFD_AAPL_UW_EUR_OTC-TRADEREPUBLIC_TRADER-LONG/KID_ET_CFD_TR/CBET/ESTONIAN",
+                "shortKidLink": "https://socgen-leverage-trading.traderepublic.com.cry.sgmarkets.com/fortune-web-server/static/fortune-nife/documents/kid/CFD_AAPL_UW_EUR_OTC-TRADEREPUBLIC_TRADER-SHORT/KID_ET_CFD_TR/CBET/ESTONIAN",
+                "kidRequired": true,
+                "savable": false,
+                "fractionalTradingAllowed": false
+            },
+            "SI": {
+                "active": false,
+                "kidLink": "",
+                "longKidLink": "",
+                "shortKidLink": "",
+                "kidRequired": true,
+                "savable": false,
+                "fractionalTradingAllowed": false
+            },
+            "GR": {
+                "active": false,
+                "kidLink": "",
+                "longKidLink": "",
+                "shortKidLink": "",
+                "kidRequired": true,
+                "savable": false,
+                "fractionalTradingAllowed": false
+            }
+        },
+        "kidRequired": false,
+        "kidLink": null,
+        "longKidLink": null,
+        "shortKidLink": null,
+        "exchanges": [
+            {
+                "slug": "SLT",
+                "active": true,
+                "nameAtExchange": "APPLE INC",
+                "symbolAtExchange": "CFD_AAPL_UW_EUR_OTC",
+                "band": null,
+                "firstSeen": 1738802159345,
+                "lastSeen": 1773966661563,
+                "firstTradingDay": null,
+                "lastTradingDay": null,
+                "tradingTimes": {
+                    "start": 28815000,
+                    "end": 79199000
+                },
+                "fractionalTrading": {
+                    "minOrderSize": "1",
+                    "maxOrderSize": "2357",
+                    "stepSize": "0.000000010",
+                    "orderAmountLimitCurrency": "EUR",
+                    "minOrderAmount": "1",
+                    "maxOrderAmount": "100000"
+                },
+                "settlementRoute": "DEFAULT",
+                "weight": null
+            }
+        ],
+        "underlying": {
+            "name": "APPLE INC.",
+            "isin": "US0378331005",
+            "shortName": "Apple",
+            "available": false,
+            "instrumentType": "STOCK",
+            "legalInstrumentType": null,
+            "wkn": "865985",
+            "symbol": "APC"
+        }
+    },
+    "sanctioned": false,
+    "eligibleForProducts": [],
+    "taxProviderInfo": {
+        "regnology": {
+            "instrumentType": "SHARE",
+            "instrumentSubType": null
+        },
+        "wmdaten": {
+            "instrumentTypeA": "SEC",
+            "instrumentTypeB": "1000",
+            "instrumentTypeC": "1002",
+            "instrumentTypeD": "ZZZZ",
+            "instrumentTypeE": "ZZZZ",
+            "instrumentTypeF": "ZZZZ",
+            "bistaIssuerCategory": "903"
+        },
+        "six": {
+            "legalForm": null,
+            "characteristicsOfLegalForm": null
+        }
+    },
+    "originCountry": "US",
+    "instrumentCategory": "brokerage",
+    "altName": null,
+    "scope": null,
+    "corporateActionInfo": null,
+    "deviatingTaxationCountry": null,
+    "frRegisteredShareType": null
+}	1774023562.5296552

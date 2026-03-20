@@ -20,6 +20,11 @@ const supported = [
         transaction_total_days: "730",
         max_access_valid_for_days: "180",
     },
+    {
+        id: "FLATEX",
+        name: "Flatex",
+        countries: ["AT"],
+    },
 ] as unknown as Institution[];
 
 export default async function getSupportedInstitutions(

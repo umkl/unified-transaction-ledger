@@ -6,7 +6,7 @@
             "type": "node",
             "request": "launch",
             "program": "${workspaceFolder}/dist/cli.js",
-            "args": ["spreadsheet"],
+            "args": ["balance"],
             "console": "integratedTerminal",
             "sourceMaps": true,
             "outFiles": ["${workspaceFolder}/dist/**/*.js"],

@@ -6,7 +6,7 @@ import path from "path";
 
 import { fileExists } from "./lib/file-exists";
 import { toSnakeCase } from "./lib/snake-case";
-import retrieveTransactionsFromTradeRepublic from "./traderepublic";
+import retrieveTransactionsFromTradeRepublic from "./tradeRepublic";
 import getSupportedInstitutions from "./supported";
 import { TransactionType } from "./const/enums";
 import { getConfigPath } from "./lib/env";
@@ -68,6 +68,40 @@ export class Transactions {
                 month === undefined || tDate.getMonth() + 1 === month;
             return matchesYear && matchesMonth;
         });
+    }
+
+    public toCSVLines(
+        transactions: Transaction[] = this.transactions,
+    ): string[] {
+        const columns: (keyof Transaction)[] = [
+            "id",
+            "amount",
+            "type",
+            "date",
+            "description",
+            "recipient",
+            "institutionId",
+        ];
+
+        const escapeCSV = (value: unknown): string => {
+            if (value === null || value === undefined) return "";
+            const normalized =
+                value instanceof Date
+                    ? value.toISOString().split("T")[0]
+                    : String(value);
+            if (/[,"\n\r]/.test(normalized)) {
+                return `"${normalized.replace(/"/g, '""')}"`;
+            }
+            return normalized;
+        };
+
+        const lines = [columns.join(",")];
+        for (const tx of transactions) {
+            const row = columns.map((key) => escapeCSV(tx[key])).join(",");
+            lines.push(row);
+        }
+
+        return lines;
     }
 
     public async writeToJsonFile() {

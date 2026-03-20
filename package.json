@@ -4,7 +4,7 @@
 	"scripts": {
 		"build": "tsc --build",
 		"start": "tsc --build && node ./dist/cli.js",
-        "compile": "tsc --build && bun build ./dist/cli.js --compile --outfile ./bin/utl"
+		"compile": "tsc --build && bun build ./dist/cli.js --compile --outfile ./bin/utl"
 	},
 	"bin": {
 		"utl": "./dist/cli.js"
@@ -17,10 +17,12 @@
 		"typescript": "^5.9.3"
 	},
 	"dependencies": {
+		"@brokerize/client": "^1.4.0",
 		"@inquirer/prompts": "^7.8.1",
 		"commander": "^14.0.2",
 		"date-prompt": "^1.0.0",
 		"open": "^8.4.0",
+		"rxjs": "^7.8.2",
 		"ws": "^8.19.0"
 	}
 }
