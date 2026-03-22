@@ -76,3 +76,26 @@ Creates a csv spreadsheet with all bank account balances grouped by date sorted 
 - Raiffeisen Cash
 - Revolut Cash
 - N26 Business Cash
+
+## Budgets
+
+! not implemented yet
+
+budget entity looks like this:
+
+amount
+bank account
+
+you can push money into an budget manually and later on see how an account is divided up.
+
+for instance there is a trade republic cash account with 1000 on it then you can execute
+
+budget stocks --account trade_republic_cash 400
+
+then when i do budget stocks
+
+i see
+
+trade_republic cash
+stocks: 400
+rest: 600

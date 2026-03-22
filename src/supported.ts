@@ -23,6 +23,15 @@ const supported = [
         name: "Flatex",
         countries: ["AT"],
     },
+    {
+        id: "N26_NTSBDEB1",
+        name: "N26 Bank",
+        bic: "NTSBDEB1XXX",
+        transaction_total_days: "730",
+        countries: ["AT"],
+        logo: "https://storage.googleapis.com/gc-prd-institution_icons-production/DE/PNG/n26.png",
+        max_access_valid_for_days: "180",
+    },
 ] as unknown as Institution[];
 
 export default async function getSupportedInstitutions(

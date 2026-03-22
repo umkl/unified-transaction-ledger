@@ -185,12 +185,15 @@ export default async function balanceAction() {
 
         if (
             insti === "RAIFFEISEN_AT_RZBAATWW" ||
-            insti === "REVOLUT_REVOLT21"
+            insti === "REVOLUT_REVOLT21" ||
+            insti === "N26_NTSBDEB1"
         ) {
             const bankId =
                 insti === "RAIFFEISEN_AT_RZBAATWW"
                     ? "RAIFFEISEN_CASH"
-                    : "REVOLUT_CASH";
+                    : insti === "REVOLUT_REVOLT21"
+                      ? "REVOLUT_CASH"
+                      : "N26_CASH";
             try {
                 const accessToken = process.env["GCL_ACCESS_TOKEN"];
                 if (!accessToken) {
@@ -212,6 +215,12 @@ export default async function balanceAction() {
                     accountId,
                     insti,
                 );
+                if (insti === "N26_NTSBDEB1") {
+                    console.log(
+                        "N26 balance response:",
+                        JSON.stringify(response, null, 2),
+                    );
+                }
                 const picked = pickGocardlessBalance(response?.balances ?? []);
                 const amount = parseAmount(picked?.balanceAmount?.amount) as
                     | number

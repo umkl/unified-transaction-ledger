@@ -24,7 +24,7 @@ export const BALANCE_EXPORT_COLUMNS: { label: string; bankId: string }[] = [
     { label: "Flatex Portfolio", bankId: "FLATEX_PORTFOLIO" },
     { label: "Raiffeisen Cash", bankId: "RAIFFEISEN_CASH" },
     { label: "Revolut Cash", bankId: "REVOLUT_CASH" },
-    { label: "N26 Business Cash", bankId: "N26_BUSINESS_CASH" },
+    { label: "N26 Cash", bankId: "N26_CASH" },
 ];
 
 export function getBalanceFilePath() {
