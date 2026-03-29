@@ -8,3 +8,5 @@ out/
 all-transactions.csv
 *.bun-build
 bin
+
+balances.csv

@@ -34,8 +34,6 @@ export default function fetchNewAccessToken(
                     if (json["status_code"] >= 400) {
                         reject(new Error(`Error response: ${bodyData}`));
                     }
-                    console.log("fetched new access token");
-                    console.log(json);
                     resolve(json);
                 } catch (err) {
                     reject(err);

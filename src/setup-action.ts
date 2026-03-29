@@ -46,7 +46,8 @@ export async function getOrFetchNewToken(
     if (refreshToken) {
         try {
             const result = await fetchNewAccessToken(refreshToken);
-            process.env["GCL_ACCESS_TOKEN"] = result;
+            process.env["GCL_ACCESS_TOKEN"] = result.access;
+            await persistEnv(["GCL_ACCESS_TOKEN", "GCL_REFRESH_TOKEN"]);
             return result;
         } catch (e) {
             log("Couldn't refresh using refresh token.");
@@ -57,6 +58,7 @@ export async function getOrFetchNewToken(
     const content = await fetchNewTokenPair(secretId, secretKey);
     process.env["GCL_ACCESS_TOKEN"] = content["access"] as string;
     process.env["GCL_REFRESH_TOKEN"] = content["refresh"] as string;
+    await persistEnv(["GCL_ACCESS_TOKEN", "GCL_REFRESH_TOKEN"]);
     return content["access"] as string;
 }
 

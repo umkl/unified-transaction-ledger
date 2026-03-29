@@ -33,6 +33,8 @@ export async function readConfig(): Promise<Config> {
 export async function writeConfig(config: Config): Promise<void> {
     await fs.mkdir(CONFIG_DIR, { recursive: true });
     const serialized = JSON.stringify(config, null, 2) + "\n";
+    console.log("WRITE:!");
+    console.log(serialized);
     await fs.writeFile(CONFIG_PATH, serialized, {
         encoding: "utf-8",
         mode: 0o600,
@@ -53,6 +55,8 @@ export async function loadEnv() {
 
 export async function persistEnv(keysToPersist: string[] = []) {
     const config = await readConfig();
+    console.log("PERSIST:");
+    console.log(config);
     for (const key of keysToPersist) {
         const value = process.env[key];
         if (typeof value === "string") {
