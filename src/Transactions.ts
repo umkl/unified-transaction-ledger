@@ -375,6 +375,97 @@ export class Transactions {
         }
     }
 
+    async fetchTransactionsN26(
+        institutionId: string = "N26_NTSBDEB1",
+        accountId: string,
+    ) {
+        const supported = await getSupportedInstitutions();
+        const institution = supported.find((x) => x.id === institutionId);
+        if (!institution) {
+            throw new Error("Institution wasn't found");
+        }
+
+        const cacheDir = path.dirname(getConfigPath());
+        const prefix = `response-${institutionId}`;
+
+        let data: any;
+        try {
+            const files = await fs.readdir(cacheDir);
+            const matchingFiles = files.filter(
+                (f) => f.startsWith(prefix) && f.endsWith(".json"),
+            );
+            if (matchingFiles.length === 0) {
+                throw new Error("No cached response files found");
+            }
+            matchingFiles.sort((a, b) => {
+                const dateA = a.slice(prefix.length, prefix.length + 10);
+                const dateB = b.slice(prefix.length, prefix.length + 10);
+                return dateA.localeCompare(dateB);
+            });
+
+            const latestFile = matchingFiles[matchingFiles.length - 1];
+            const cachePath = path.join(cacheDir, latestFile);
+
+            const fetchRegardless = await confirm({
+                message:
+                    "There is a cached response - do you want to create a new fetch (only 4 per day)?",
+            });
+            if (fetchRegardless) {
+                throw new Error("Fetching regardless of cache");
+            }
+
+            console.log(cachePath);
+            data = JSON.parse(await fs.readFile(cachePath, "utf8"));
+        } catch (err: Error | any) {
+            log("Proceeding to fetch from API...");
+            data = await listTransactionsRequest(
+                process.env["GCL_ACCESS_TOKEN"],
+                accountId,
+                institutionId,
+            );
+        }
+
+        const transactions = data.transactions.booked;
+
+        const transactionsMapped: Transaction[] = transactions?.map(
+            (tx: any): Transaction => {
+                const amount = +tx.transactionAmount.amount;
+                const isNegative = amount < 0;
+                const description =
+                    tx.creditorName ??
+                    tx.debtorName ??
+                    tx.remittanceInformationUnstructured ??
+                    tx.additionalInformation ??
+                    tx.title ??
+                    tx.transactionId;
+
+                return {
+                    id: tx.transactionId,
+                    amount: tx.transactionAmount.amount,
+                    date: new Date(tx.bookingDateTime ?? tx.bookingDate),
+                    description,
+                    type: isNegative
+                        ? TransactionType.LIABILITY
+                        : TransactionType.RECEIVABLE,
+                    recipient: tx.creditorName ?? tx.debtorName ?? description,
+                    institution: institution,
+                    institutionId: institution.id,
+                };
+            },
+        );
+
+        for (const newTransaction of transactionsMapped) {
+            const existingTransactionWithSameId = this.transactions.find(
+                (existingTransaction) => {
+                    return existingTransaction.id === newTransaction.id;
+                },
+            );
+            if (existingTransactionWithSameId === undefined) {
+                this.addTransaction(newTransaction);
+            }
+        }
+    }
+
     public async fetchTransactionsFromTradeRepublic(
         institutionId: string = "TRADE_REPUBLIC",
     ) {

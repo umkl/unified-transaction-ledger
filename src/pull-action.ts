@@ -56,6 +56,13 @@ export async function pullTransactionsIntoCache(transactionsDoc: Transactions) {
                 reqId,
             );
             await transactionsDoc.fetchTransactionsRevolut(insti, accounts[0]);
+        } else if (insti === "N26_NTSBDEB1") {
+            const reqId = await requisitionsDocument.getRequisitionId(insti);
+            const accounts = await listAccounts(
+                process.env["GCL_ACCESS_TOKEN"],
+                reqId,
+            );
+            await transactionsDoc.fetchTransactionsN26(insti, accounts[0]);
         } else {
             console.error("Institution not supported yet: " + insti);
         }

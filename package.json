@@ -23,6 +23,7 @@
 		"date-prompt": "^1.0.0",
 		"open": "^8.4.0",
 		"rxjs": "^7.8.2",
+		"trapi": "github:NightOwl07/trade-republic-api",
 		"ws": "^8.19.0"
 	}
 }
