@@ -1,7 +1,7 @@
 import fs from "fs/promises";
 import path from "path";
-import { fileExists } from "./lib/file-exists";
-import { getConfigPath } from "./lib/env";
+import { fileExists } from "../lib/file-exists";
+import { getConfigPath } from "../lib/config";
 
 export type BankBalance = {
     bankId: string;

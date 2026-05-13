@@ -1,7 +1,7 @@
 import { https } from "follow-redirects";
 import fs from "node:fs";
 import path from "node:path";
-import { getConfigPath } from "../lib/env";
+import { getConfigPath } from "../lib/config";
 
 const options = {
     method: "GET",
@@ -44,10 +44,8 @@ export async function listBalancesRequest(
                         configDir,
                         `balance-response-${accountId}-${institutionId}-${date}.json`,
                     );
-                    fs.writeFile(
-                        cachePath,
-                        JSON.stringify(json, null, 2),
-                        () => resolve(json),
+                    fs.writeFile(cachePath, JSON.stringify(json, null, 2), () =>
+                        resolve(json),
                     );
                 } catch (err) {
                     reject(err);

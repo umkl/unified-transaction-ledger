@@ -1,9 +1,9 @@
 import { checkbox, select } from "@inquirer/prompts";
-import { rl } from "./infra";
-import { Requisitions } from "./Requisitions";
-import { Transactions } from "./Transactions";
-import getSupportedInstitutions from "./supported";
-import { listAccounts } from "./requests/list-accounts";
+import { rl } from "../lib/readline-interface";
+import { Requisitions } from "../entities/Requisitions";
+import { Transactions } from "../entities/Transactions";
+import getSupportedInstitutions from "../const/supported";
+import { listAccounts } from "../requests/list-accounts";
 
 export default async function pullAction() {
     const transactionsCacheDocument =

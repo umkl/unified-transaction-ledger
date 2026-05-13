@@ -4,8 +4,8 @@ import {
     BalanceSnapshots,
     BALANCE_EXPORT_COLUMNS,
     formatDateForExport,
-} from "./Balance";
-import { log } from "./utils";
+} from "../entities/Balance";
+import { log } from "../lib/log";
 
 const escapeCSV = (value: unknown): string => {
     if (value === null || value === undefined) return "";
@@ -27,10 +27,7 @@ export default async function balanceExportAction() {
         return;
     }
 
-    const header = [
-        "date",
-        ...BALANCE_EXPORT_COLUMNS.map((col) => col.label),
-    ];
+    const header = ["date", ...BALANCE_EXPORT_COLUMNS.map((col) => col.label)];
 
     const lines = [header.join(",")];
     for (const snapshot of entries) {

@@ -2,17 +2,16 @@
 
 import { program } from "commander";
 import { version } from "../package.json";
-
-import { setupAction } from "./setup-action";
-import { excelAction } from "./excel";
-import cashAction from "./cash";
-import spreadsheetAction from "./spreadsheet-action";
-import pullAction from "./pull-action";
-import { loadEnv } from "./lib/env";
-import balanceAction from "./balance-action";
-import balanceExportAction from "./balance-export-action";
+import { setupAction } from "./core/setup-tokens";
+import cashAction from "./core/interrogate-cash";
+import spreadsheetAction from "./core/export-to-spreadsheet";
+import pullAction from "./core/pull-transactions";
+import { loadEnv } from "./lib/config";
+import balanceAction from "./core/interrogate-orphaned-balance";
+import balanceExportAction from "./core/export-balance";
 
 program.name("utl").version(version);
+
 program.hook("preAction", async () => {
     await loadEnv();
 });

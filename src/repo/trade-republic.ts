@@ -1,9 +1,9 @@
 import { confirm, input } from "@inquirer/prompts";
 import fs from "fs";
-import { trAuthRequest } from "./requests/trade-republic/authRequest";
-import { trVerifyCodeRequest } from "./requests/trade-republic/verifyCodeRequest";
+import { trAuthRequest } from "../requests/trade-republic/authRequest";
+import { trVerifyCodeRequest } from "../requests/trade-republic/verifyCodeRequest";
 import { writeFile } from "fs/promises";
-import { getConfigPath, readConfig, writeConfig } from "./lib/env";
+import { getConfigPath, readConfig, writeConfig } from "../lib/config";
 import path from "path";
 import type { TradeRepublicApi as TradeRepublicApiType } from "trapi";
 
@@ -114,10 +114,9 @@ async function fetchAllTransactionsViaTrapi(
 
     while (true) {
         const timelineMessage = afterCursor
-            ? createMessage(
-                  "timelineTransactions",
-                  { after: afterCursor } as any,
-              )
+            ? createMessage("timelineTransactions", {
+                  after: afterCursor,
+              } as any)
             : createMessage("timelineTransactions");
 
         const timelineData = await subscribeOnceJson<any>(
@@ -139,13 +138,18 @@ async function fetchAllTransactionsViaTrapi(
 
         for (const tx of items) {
             const txId = tx?.id;
-            if (typeof tx?.status === "string" && tx.status.includes("CANCELED")) {
+            if (
+                typeof tx?.status === "string" &&
+                tx.status.includes("CANCELED")
+            ) {
                 continue;
             }
             if (txId) {
                 const details = await subscribeOnceJson<any>(
                     api,
-                    createMessage("timelineDetailV2", { id: txId } as any) as any,
+                    createMessage("timelineDetailV2", {
+                        id: txId,
+                    } as any) as any,
                 );
                 Object.assign(tx, extractTransactionDetails(details));
             }
@@ -248,7 +252,6 @@ async function authenticate(pin: string, phone: string): Promise<string> {
     const sessionToken = sessionCookie.split(";")[0].split("=")[1];
     return sessionToken;
 }
-
 
 export async function fetchAccountInformation(): Promise<any> {
     const config = await readConfig();

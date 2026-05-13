@@ -1,5 +1,5 @@
 import { https } from "follow-redirects";
-import { log } from "../utils";
+import { log } from "../lib/log";
 
 var options = {
     method: "POST",

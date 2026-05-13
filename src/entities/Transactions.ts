@@ -1,15 +1,15 @@
 import fs from "fs/promises";
-import { listTransactionsRequest } from "./requests/account-transactions";
-import { log } from "./utils";
+import { listTransactionsRequest } from "../requests/account-transactions";
+import { log } from "../lib/log";
 import { confirm } from "@inquirer/prompts";
 import path from "path";
 
-import { fileExists } from "./lib/file-exists";
-import { toSnakeCase } from "./lib/snake-case";
-import retrieveTransactionsFromTradeRepublic from "./tradeRepublic";
-import getSupportedInstitutions from "./supported";
-import { TransactionType } from "./const/enums";
-import { getConfigPath } from "./lib/env";
+import { fileExists } from "../lib/file-exists";
+import { toSnakeCase } from "../lib/snake-case";
+import retrieveTransactionsFromTradeRepublic from "../repo/trade-republic";
+import getSupportedInstitutions from "../const/supported";
+import { TransactionType } from "../const/enums";
+import { getConfigPath } from "../lib/config";
 
 export class Transactions {
     private transactions: Transaction[] = [];

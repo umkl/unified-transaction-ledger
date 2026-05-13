@@ -1,10 +1,9 @@
-import { rl } from "./infra";
-import fetchNewTokenPair from "./requests/gcl-new-token-pair";
-import fs from "fs";
-import { log } from "./utils";
-import { getConfigPath, loadEnv, persistEnv } from "./lib/env";
+import { rl } from "../lib/readline-interface";
+import fetchNewTokenPair from "../requests/gcl-new-token-pair";
+import { log } from "../lib/log";
+import { getConfigPath, loadEnv, persistEnv } from "../lib/config";
 import { confirm } from "@inquirer/prompts";
-import fetchNewAccessToken from "./requests/gcl-new-access-token";
+import fetchNewAccessToken from "../requests/gcl-new-access-token";
 
 export async function setupAction(): Promise<void> {
     log(`Reading config at ${getConfigPath()}`);

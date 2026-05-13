@@ -1,7 +1,7 @@
 import { https } from "follow-redirects";
 import { log } from "node:console";
 import fs from "node:fs";
-import { getConfigPath } from "../lib/env";
+import { getConfigPath } from "../lib/config";
 
 const options = {
     method: "GET",

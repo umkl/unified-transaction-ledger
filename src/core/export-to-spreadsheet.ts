@@ -1,6 +1,6 @@
 import { log } from "console";
-import { Transactions } from "./Transactions";
-import { rl } from "./infra";
+import { Transactions } from "../entities/Transactions";
+import { rl } from "../lib/readline-interface";
 import { input } from "@inquirer/prompts";
 const fs = require("fs").promises;
 const path = require("path");

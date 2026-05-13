@@ -1,11 +1,12 @@
 import fs from "fs/promises";
 import http from "node:http";
-import { createRequisition } from "./requests/requisition";
-import { log } from "./utils";
+import { createRequisition } from "../requests/requisition";
 import { confirm } from "@inquirer/prompts";
 import open from "open";
 import path from "node:path";
-import { getConfigPath } from "./lib/env";
+
+import { log } from "../lib/log";
+import { getConfigPath } from "../lib/config";
 
 export class Requisitions {
     private requisitions = new Map<string, any>();

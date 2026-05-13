@@ -5,8 +5,6 @@ cache/
 dist/
 out/
 .DS_Store
-all-transactions.csv
 *.bun-build
+*.csv
 bin
-
-balances.csv

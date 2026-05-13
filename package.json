@@ -2,12 +2,8 @@
 	"name": "utl",
 	"version": "0.1.0",
 	"scripts": {
-		"build": "tsc --build",
-		"start": "tsc --build && node ./dist/cli.js",
-		"compile": "tsc --build && bun build ./dist/cli.js --compile --outfile ./bin/utl"
-	},
-	"bin": {
-		"utl": "./dist/cli.js"
+        "build:cli": "tsc --build && bun build ./dist/cli.js --compile --outfile ./bin/utl",
+		"start": "tsc --build && node ./dist/cli.js"
 	},
 	"devDependencies": {
 		"@types/follow-redirects": "^1.14.4",

@@ -1,6 +1,6 @@
-# Purpose
+# unified-transaction-ledger
 
-Aggregating transactions from various open bank apis into one spreadsheet using Nordigen (now GoCardless).
+aggregates transactions from various open bank apis into one spreadsheet using nordigen (now gocardless)
 
 ## Walkthrough
 

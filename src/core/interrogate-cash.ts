@@ -2,8 +2,7 @@ import { input } from "@inquirer/prompts";
 
 import crypto from "crypto";
 import datePrompt from "date-prompt";
-import { Transactions } from "./Transactions";
-import fs from "fs/promises";
+import { Transactions } from "../entities/Transactions";
 
 export default async function cashAction() {
     // 1. amount

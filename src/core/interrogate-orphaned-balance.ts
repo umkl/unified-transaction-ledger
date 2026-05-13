@@ -1,18 +1,18 @@
 import { checkbox } from "@inquirer/prompts";
-import { brokerizePortfolioRequest } from "./requests/brokerize/portfolioRequest";
-import getSupportedInstitutions from "./supported";
-import { fetchAccountInformation } from "./tradeRepublic";
-import { readConfig } from "./lib/env";
+import { brokerizePortfolioRequest } from "../requests/brokerize/portfolioRequest";
+import getSupportedInstitutions from "../const/supported";
+import { fetchAccountInformation } from "../repo/trade-republic";
+import { readConfig } from "../lib/config";
 import {
     BalanceSnapshots,
     BankBalance,
     computeTotalBalance,
     toDateKey,
-} from "./Balance";
-import { log } from "./utils";
-import { Requisitions } from "./Requisitions";
-import { listAccounts } from "./requests/list-accounts";
-import { listBalancesRequest } from "./requests/account-balances";
+} from "../entities/Balance";
+import { log } from "../lib/log";
+import { Requisitions } from "../entities/Requisitions";
+import { listAccounts } from "../requests/list-accounts";
+import { listBalancesRequest } from "../requests/account-balances";
 
 const DEFAULT_CURRENCY = "EUR";
 
