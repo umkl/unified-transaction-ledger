@@ -1,31 +1,31 @@
-import { confirm, input } from "@inquirer/prompts";
-import fs from "fs";
-import { trAuthRequest } from "../requests/trade-republic/authRequest";
-import { trVerifyCodeRequest } from "../requests/trade-republic/verifyCodeRequest";
-import { writeFile } from "fs/promises";
-import { getConfigPath, readConfig, writeConfig } from "../lib/config";
-import path from "path";
-import type { TradeRepublicApi as TradeRepublicApiType } from "trapi";
+import { confirm, input } from '@inquirer/prompts';
+import fs from 'fs';
+import { trAuthRequest } from '../requests/trade-republic/authRequest';
+import { trVerifyCodeRequest } from '../requests/trade-republic/verifyCodeRequest';
+import { writeFile } from 'fs/promises';
+import { getConfigPath, readConfig, writeConfig } from '../lib/config';
+import path from 'path';
+import type { TradeRepublicApi as TradeRepublicApiType } from 'trapi';
 
-type TrapiModule = typeof import("trapi");
+type TrapiModule = typeof import('trapi');
 const TRAPI_TIMEOUT_MS = 15_000;
 
 async function loadTrapi(): Promise<TrapiModule> {
-    return await import("trapi");
+    return await import('trapi');
 }
 
 async function subscribeOnceJson<T>(
     api: TradeRepublicApiType,
     message: Record<string, unknown>,
-    timeoutMs: number = TRAPI_TIMEOUT_MS,
+    timeoutMs: number = TRAPI_TIMEOUT_MS
 ): Promise<T> {
     return new Promise<T>((resolve, reject) => {
         let timeout: ReturnType<typeof setTimeout> | null = null;
         let done = false;
 
         const tryExtractJson = (raw: string): string | null => {
-            const firstBrace = raw.indexOf("{");
-            const firstBracket = raw.indexOf("[");
+            const firstBrace = raw.indexOf('{');
+            const firstBracket = raw.indexOf('[');
             let start = -1;
             let end = -1;
 
@@ -34,10 +34,10 @@ async function subscribeOnceJson<T>(
                 (firstBrace === -1 || firstBracket < firstBrace)
             ) {
                 start = firstBracket;
-                end = raw.lastIndexOf("]");
+                end = raw.lastIndexOf(']');
             } else if (firstBrace !== -1) {
                 start = firstBrace;
-                end = raw.lastIndexOf("}");
+                end = raw.lastIndexOf('}');
             }
 
             if (start !== -1 && end !== -1 && end > start) {
@@ -88,7 +88,7 @@ async function subscribeOnceJson<T>(
 function extractTransactionDetails(payload: any): Record<string, string> {
     const transactionData: Record<string, string> = {};
     for (const section of payload?.sections || []) {
-        if (section?.title === "Transaktion") {
+        if (section?.title === 'Transaktion') {
             for (const item of section.data || []) {
                 const key = item.title;
                 const value = item.detail?.text;
@@ -96,8 +96,8 @@ function extractTransactionDetails(payload: any): Record<string, string> {
             }
         }
 
-        if (section?.action?.type === "instrumentDetail") {
-            if (typeof section.action.payload === "string") {
+        if (section?.action?.type === 'instrumentDetail') {
+            if (typeof section.action.payload === 'string') {
                 transactionData.ISIN = section.action.payload;
             }
         }
@@ -107,21 +107,21 @@ function extractTransactionDetails(payload: any): Record<string, string> {
 
 async function fetchAllTransactionsViaTrapi(
     api: TradeRepublicApiType,
-    createMessage: TrapiModule["createMessage"],
+    createMessage: TrapiModule['createMessage']
 ) {
     const allData: any[] = [];
     let afterCursor: string | undefined;
 
     while (true) {
         const timelineMessage = afterCursor
-            ? createMessage("timelineTransactions", {
+            ? createMessage('timelineTransactions', {
                   after: afterCursor,
               } as any)
-            : createMessage("timelineTransactions");
+            : createMessage('timelineTransactions');
 
         const timelineData = await subscribeOnceJson<any>(
             api,
-            timelineMessage as any,
+            timelineMessage as any
         );
 
         if (timelineData?.errors?.length > 0) {
@@ -139,17 +139,17 @@ async function fetchAllTransactionsViaTrapi(
         for (const tx of items) {
             const txId = tx?.id;
             if (
-                typeof tx?.status === "string" &&
-                tx.status.includes("CANCELED")
+                typeof tx?.status === 'string' &&
+                tx.status.includes('CANCELED')
             ) {
                 continue;
             }
             if (txId) {
                 const details = await subscribeOnceJson<any>(
                     api,
-                    createMessage("timelineDetailV2", {
+                    createMessage('timelineDetailV2', {
                         id: txId,
-                    } as any) as any,
+                    } as any) as any
                 );
                 Object.assign(tx, extractTransactionDetails(details));
             }
@@ -171,7 +171,7 @@ export default async function retrieveTransactionsFromTradeRepublic() {
 
     if (!phone) {
         phone = await input({
-            message: "Enter your phone number:",
+            message: 'Enter your phone number:',
             validate: () => true,
         });
 
@@ -184,10 +184,10 @@ export default async function retrieveTransactionsFromTradeRepublic() {
 
     if (!pin) {
         pin = await input({
-            message: "Enter your PIN (4 digits):",
+            message: 'Enter your PIN (4 digits):',
             validate: (input) => {
                 if (input.length !== 4) {
-                    return "Please provide a PIN with a length of 4 digits";
+                    return 'Please provide a PIN with a length of 4 digits';
                 }
                 return true;
             },
@@ -200,27 +200,27 @@ export default async function retrieveTransactionsFromTradeRepublic() {
 
     const { TradeRepublicApi, createMessage } = await loadTrapi();
     const configDir = path.dirname(getConfigPath());
-    const cookiePath = path.join(configDir, "trapi-cookies.json");
+    const cookiePath = path.join(configDir, 'trapi-cookies.json');
 
     const api = new TradeRepublicApi(phone, pin, cookiePath);
     const loggedIn = await api.login(async () => {
         return await input({
-            message: "Enter device PIN sent to your phone:",
+            message: 'Enter device PIN sent to your phone:',
         });
     });
 
     if (!loggedIn) {
-        throw new Error("Trade Republic login failed");
+        throw new Error('Trade Republic login failed');
     }
 
     const transactions = await fetchAllTransactionsViaTrapi(api, createMessage);
 
-    const today = new Date().toISOString().split("T")[0];
+    const today = new Date().toISOString().split('T')[0];
     const responsePath = path.join(configDir, `response-tr-${today}.json`);
     const dedicatedPath = path.join(
         process.cwd(),
-        "cache",
-        "trade-republic-transactions.json",
+        'cache',
+        'trade-republic-transactions.json'
     );
 
     await fs.promises.mkdir(path.dirname(responsePath), { recursive: true });
@@ -240,7 +240,7 @@ async function authenticate(pin: string, phone: string): Promise<string> {
     const processId = result.processId;
     const countdown = result.countdownInSeconds;
     if (!processId) {
-        console.error("Error - Invalid PIN or phone number");
+        console.error('Error - Invalid PIN or phone number');
         process.exit(1);
     }
 
@@ -249,7 +249,7 @@ async function authenticate(pin: string, phone: string): Promise<string> {
     });
 
     const sessionCookie = await trVerifyCodeRequest(code, processId);
-    const sessionToken = sessionCookie.split(";")[0].split("=")[1];
+    const sessionToken = sessionCookie.split(';')[0].split('=')[1];
     return sessionToken;
 }
 
@@ -259,7 +259,7 @@ export async function fetchAccountInformation(): Promise<any> {
 
     if (!phone) {
         phone = await input({
-            message: "Enter your phone number:",
+            message: 'Enter your phone number:',
             validate: (input) => {
                 return true;
             },
@@ -274,10 +274,10 @@ export async function fetchAccountInformation(): Promise<any> {
 
     if (!pin) {
         pin = await input({
-            message: "Enter your PIN (4 digits):",
+            message: 'Enter your PIN (4 digits):',
             validate: (input) => {
                 if (input.length !== 4) {
-                    return "Please provide a PIN with a length of 4 digits";
+                    return 'Please provide a PIN with a length of 4 digits';
                 }
                 return true;
             },
@@ -291,43 +291,43 @@ export async function fetchAccountInformation(): Promise<any> {
 
     const { TradeRepublicApi, createMessage } = await loadTrapi();
     const configDir = path.dirname(getConfigPath());
-    const cookiePath = path.join(configDir, "trapi-cookies.json");
+    const cookiePath = path.join(configDir, 'trapi-cookies.json');
 
     const api = new TradeRepublicApi(phone, pin, cookiePath);
     const loggedIn = await api.login(async () => {
         return await input({
-            message: "Enter device PIN sent to your phone:",
+            message: 'Enter device PIN sent to your phone:',
         });
     });
 
     if (!loggedIn) {
-        throw new Error("Trade Republic login failed");
+        throw new Error('Trade Republic login failed');
     }
 
     const accountPairs = await subscribeOnceJson<any>(
         api,
-        createMessage("accountPairs") as any,
+        createMessage('accountPairs') as any
     );
     const secAccNo = accountPairs?.accounts?.[0]?.securitiesAccountNumber;
     if (!secAccNo) {
         throw new Error(
-            "Missing securitiesAccountNumber in accountPairs response",
+            'Missing securitiesAccountNumber in accountPairs response'
         );
     }
 
     const cash = await subscribeOnceJson<any>(
         api,
-        createMessage("cash") as any,
+        createMessage('cash') as any
     );
 
     const portfolioResponse = await subscribeOnceJson<any>(
         api,
-        createMessage("compactPortfolioByType", { secAccNo } as any) as any,
+        createMessage('compactPortfolioByType', { secAccNo } as any) as any
     );
 
     const positions =
         portfolioResponse?.categories?.flatMap(
-            (category: any) => category.positions || [],
+            (category: any) => category.positions || []
         ) || [];
 
     const tickerResults: Record<string, unknown> = {};
@@ -338,7 +338,7 @@ export async function fetchAccountInformation(): Promise<any> {
         const tickerId = `${isin}.LSX`;
         const tickerResponse = await subscribeOnceJson<any>(
             api,
-            createMessage("ticker", { id: tickerId } as any) as any,
+            createMessage('ticker', { id: tickerId } as any) as any
         );
         tickerResults[isin] = tickerResponse;
         const prePrice = Number(tickerResponse?.pre?.price ?? 0);

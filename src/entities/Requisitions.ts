@@ -1,12 +1,12 @@
-import fs from "fs/promises";
-import http from "node:http";
-import { createRequisition } from "../requests/requisition";
-import { confirm } from "@inquirer/prompts";
-import open from "open";
-import path from "node:path";
+import fs from 'fs/promises';
+import http from 'node:http';
+import { createRequisition } from '../requests/requisition';
+import { confirm } from '@inquirer/prompts';
+import open from 'open';
+import path from 'node:path';
 
-import { log } from "../lib/log";
-import { getConfigPath } from "../lib/config";
+import { log } from '../lib/log';
+import { getConfigPath } from '../lib/config';
 
 export class Requisitions {
     private requisitions = new Map<string, any>();
@@ -16,17 +16,17 @@ export class Requisitions {
 
     public static async create() {
         const configDir = path.dirname(getConfigPath());
-        const filePath = path.join(configDir, "requisitions.json");
+        const filePath = path.join(configDir, 'requisitions.json');
         try {
             const rawRequisitions = await fs.readFile(filePath, {
-                encoding: "utf-8",
+                encoding: 'utf-8',
             });
             const jsonRequisitions = JSON.parse(rawRequisitions);
             return new Requisitions(new Map(Object.entries(jsonRequisitions)));
         } catch (e) {
-            await fs.mkdir(process.cwd() + "/cache", { recursive: true });
-            await fs.writeFile(filePath, "", {
-                encoding: "utf-8",
+            await fs.mkdir(process.cwd() + '/cache', { recursive: true });
+            await fs.writeFile(filePath, '', {
+                encoding: 'utf-8',
             });
             return new Requisitions(new Map());
         }
@@ -41,35 +41,35 @@ export class Requisitions {
                 default: false,
             });
             if (!fetchNew) {
-                return this.requisitions.get(insti)["id"];
+                return this.requisitions.get(insti)['id'];
             }
         }
 
         console.log(`Creating new requisition for institution: ${insti}`);
 
         const requisitionForInstitution: any = await createRequisition(
-            process.env["GCL_ACCESS_TOKEN"],
-            insti,
+            process.env['GCL_ACCESS_TOKEN'],
+            insti
         );
 
-        open(requisitionForInstitution["link"] as string);
+        open(requisitionForInstitution['link'] as string);
 
         let reqId = await new Promise<string>((resolve) => {
             const server = http.createServer((req: any, res: any) => {
-                if (req.url?.startsWith("/callback")) {
-                    res.writeHead(200, { "Content-Type": "text/html" });
+                if (req.url?.startsWith('/callback')) {
+                    res.writeHead(200, { 'Content-Type': 'text/html' });
                     res.end(
-                        "<h1>Authorization successful! You can close this window.</h1>",
+                        '<h1>Authorization successful! You can close this window.</h1>'
                     );
                     const url = new URL(req.url, `http://${req.headers.host}`);
                     log(JSON.stringify(Object.fromEntries(url.searchParams)));
                     server.close();
-                    resolve(url.searchParams.get("req_id") || "");
+                    resolve(url.searchParams.get('req_id') || '');
                 }
             });
             server.listen(3000, () => {
                 log(
-                    "Waiting for callback on http://localhost:3000/callback...",
+                    'Waiting for callback on http://localhost:3000/callback...'
                 );
             });
         });
@@ -88,10 +88,10 @@ export class Requisitions {
         const serialized = JSON.stringify(
             Object.fromEntries(this.requisitions),
             null,
-            2,
+            2
         );
         const configDir = path.dirname(getConfigPath());
-        const filePath = path.join(configDir, "requisitions.json");
+        const filePath = path.join(configDir, 'requisitions.json');
         await fs.writeFile(filePath, serialized);
         log(`Requisitions persisted to ${filePath}`);
     }

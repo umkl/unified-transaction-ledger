@@ -1,15 +1,15 @@
-import { https } from "follow-redirects";
-import fs from "node:fs";
-import path from "node:path";
-import { getConfigPath } from "../lib/config";
+import { https } from 'follow-redirects';
+import fs from 'node:fs';
+import path from 'node:path';
+import { getConfigPath } from '../lib/config';
 
 const options = {
-    method: "GET",
-    hostname: "bankaccountdata.gocardless.com",
-    path: "/api/v2/accounts/00000000-0000-0000-0000-000000000000/balances/",
+    method: 'GET',
+    hostname: 'bankaccountdata.gocardless.com',
+    path: '/api/v2/accounts/00000000-0000-0000-0000-000000000000/balances/',
     headers: {
-        Accept: "application/json",
-        Authorization: "",
+        Accept: 'application/json',
+        Authorization: '',
     },
     maxRedirects: 20,
 };
@@ -17,7 +17,7 @@ const options = {
 export async function listBalancesRequest(
     accessToken: string,
     accountId: string,
-    institutionId: string,
+    institutionId: string
 ): Promise<any> {
     return await new Promise((resolve, reject) => {
         options.headers.Authorization = `Bearer ${accessToken}`;
@@ -26,38 +26,38 @@ export async function listBalancesRequest(
         const req = https.request(options, function (res) {
             const chunks: any = [];
 
-            res.on("data", function (chunk) {
+            res.on('data', function (chunk) {
                 chunks.push(chunk);
             });
 
-            res.on("end", function () {
+            res.on('end', function () {
                 try {
-                    const bodyData = Buffer.concat(chunks).toString("utf-8");
+                    const bodyData = Buffer.concat(chunks).toString('utf-8');
                     const json = JSON.parse(bodyData);
-                    if (json["status_code"] >= 400) {
+                    if (json['status_code'] >= 400) {
                         reject(new Error(`Error response: ${bodyData}`));
                         return;
                     }
-                    const date = new Date().toISOString().split("T")[0];
+                    const date = new Date().toISOString().split('T')[0];
                     const configDir = path.dirname(getConfigPath());
                     const cachePath = path.join(
                         configDir,
-                        `balance-response-${accountId}-${institutionId}-${date}.json`,
+                        `balance-response-${accountId}-${institutionId}-${date}.json`
                     );
                     fs.writeFile(cachePath, JSON.stringify(json, null, 2), () =>
-                        resolve(json),
+                        resolve(json)
                     );
                 } catch (err) {
                     reject(err);
                 }
             });
 
-            res.on("error", function (error) {
+            res.on('error', function (error) {
                 reject(error);
             });
         });
 
-        req.on("error", reject);
+        req.on('error', reject);
         req.end();
     });
 }

@@ -1,37 +1,37 @@
-import { rl } from "../lib/readline-interface";
-import fetchNewTokenPair from "../requests/gcl-new-token-pair";
-import { log } from "../lib/log";
-import { getConfigPath, loadEnv, persistEnv } from "../lib/config";
-import { confirm } from "@inquirer/prompts";
-import fetchNewAccessToken from "../requests/gcl-new-access-token";
+import { rl } from '../lib/readline-interface';
+import fetchNewTokenPair from '../requests/gcl-new-token-pair';
+import { log } from '../lib/log';
+import { getConfigPath, loadConfig, persistEnv } from '../lib/config';
+import { confirm } from '@inquirer/prompts';
+import fetchNewAccessToken from '../requests/gcl-new-access-token';
 
 export async function setupAction(): Promise<void> {
     log(`Reading config at ${getConfigPath()}`);
-    await loadEnv();
+    await loadConfig();
 
-    const secretId = await getOrPromptEnvVar("GCL_SECRET_ID");
-    const secretKey = await getOrPromptEnvVar("GCL_SECRET_KEY");
+    const secretId = await getOrPromptEnvVar('GCL_SECRET_ID');
+    const secretKey = await getOrPromptEnvVar('GCL_SECRET_KEY');
     const accessToken = await getOrFetchNewToken(secretId, secretKey);
     log(accessToken);
 
-    log(process.env["GCL_ACCESS_TOKEN"]!);
-    log(process.env["GCL_REFRESH_TOKEN"]!);
+    log(process.env['GCL_ACCESS_TOKEN']!);
+    log(process.env['GCL_REFRESH_TOKEN']!);
 
     persistEnv([
-        "GCL_SECRET_ID",
-        "GCL_SECRET_KEY",
-        "GCL_ACCESS_TOKEN",
-        "GCL_REFRESH_TOKEN",
+        'GCL_SECRET_ID',
+        'GCL_SECRET_KEY',
+        'GCL_ACCESS_TOKEN',
+        'GCL_REFRESH_TOKEN',
     ]);
-    log("Setup complete.");
+    log('Setup complete.');
     rl.close();
 }
 
 export async function getOrFetchNewToken(
     secretId: string,
-    secretKey: string,
+    secretKey: string
 ): Promise<string> {
-    const accessToken = await getOrPromptEnvVar("GCL_ACCESS_TOKEN", false);
+    const accessToken = await getOrPromptEnvVar('GCL_ACCESS_TOKEN', false);
     const isFetchNewAccessToken = await confirm({
         message: `Do you want to refresh your token?`,
         default: false,
@@ -41,35 +41,35 @@ export async function getOrFetchNewToken(
         return accessToken;
     }
 
-    const refreshToken = await getOrPromptEnvVar("GCL_REFRESH_TOKEN", false);
+    const refreshToken = await getOrPromptEnvVar('GCL_REFRESH_TOKEN', false);
     if (refreshToken) {
         try {
             const result = await fetchNewAccessToken(refreshToken);
-            process.env["GCL_ACCESS_TOKEN"] = result.access;
-            await persistEnv(["GCL_ACCESS_TOKEN", "GCL_REFRESH_TOKEN"]);
+            process.env['GCL_ACCESS_TOKEN'] = result.access;
+            await persistEnv(['GCL_ACCESS_TOKEN', 'GCL_REFRESH_TOKEN']);
             return result;
         } catch (e) {
             log("Couldn't refresh using refresh token.");
-            log("Falling back to fetching new token pair.");
+            log('Falling back to fetching new token pair.');
         }
     }
 
     const content = await fetchNewTokenPair(secretId, secretKey);
-    process.env["GCL_ACCESS_TOKEN"] = content["access"] as string;
-    process.env["GCL_REFRESH_TOKEN"] = content["refresh"] as string;
-    await persistEnv(["GCL_ACCESS_TOKEN", "GCL_REFRESH_TOKEN"]);
-    return content["access"] as string;
+    process.env['GCL_ACCESS_TOKEN'] = content['access'] as string;
+    process.env['GCL_REFRESH_TOKEN'] = content['refresh'] as string;
+    await persistEnv(['GCL_ACCESS_TOKEN', 'GCL_REFRESH_TOKEN']);
+    return content['access'] as string;
 }
 
 async function getOrPromptEnvVar(
     envPropName: string,
-    isPromptNewDesired = true,
+    isPromptNewDesired = true
 ): Promise<string> {
     const envVar = process.env[envPropName];
     log(
         envVar
             ? `Found ${envPropName}: ${envVar}`
-            : `${envPropName} wasn't found.`,
+            : `${envPropName} wasn't found.`
     );
     if (!envVar && isPromptNewDesired) {
         const value = await rl.question(`Enter your ${envPropName}: `);

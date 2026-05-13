@@ -1,20 +1,20 @@
-import { https } from "follow-redirects";
-import { log } from "../lib/log";
+import { https } from 'follow-redirects';
+import { log } from '../lib/log';
 
 const options = {
-    method: "POST",
-    hostname: "bankaccountdata.gocardless.com",
-    path: "/api/v2/token/new/",
+    method: 'POST',
+    hostname: 'bankaccountdata.gocardless.com',
+    path: '/api/v2/token/new/',
     headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
     },
     maxRedirects: 20,
 };
 
 export default async function fetchNewTokenPair(
     secretId: string,
-    secretKey: string,
+    secretKey: string
 ): Promise<Record<string, unknown>> {
     return await new Promise((resolve, reject) => {
         var postData = JSON.stringify({
@@ -25,15 +25,15 @@ export default async function fetchNewTokenPair(
         const req = https.request(options, function (res) {
             let chunks: any = [];
 
-            res.on("data", function (chunk) {
+            res.on('data', function (chunk) {
                 chunks.push(chunk);
             });
 
-            res.on("end", function () {
+            res.on('end', function () {
                 try {
-                    const bodyData = Buffer.concat(chunks).toString("utf-8");
+                    const bodyData = Buffer.concat(chunks).toString('utf-8');
                     const json = JSON.parse(bodyData);
-                    if (json["status_code"] >= 400) {
+                    if (json['status_code'] >= 400) {
                         reject(new Error(`Error response: ${bodyData}`));
                     }
                     resolve(json);
@@ -42,12 +42,12 @@ export default async function fetchNewTokenPair(
                 }
             });
 
-            res.on("error", function (error) {
+            res.on('error', function (error) {
                 reject(error);
             });
         });
 
-        req.on("error", (err) => {
+        req.on('error', (err) => {
             reject(err);
         });
         req.write(postData);

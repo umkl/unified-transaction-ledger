@@ -1,25 +1,26 @@
 {
-	"name": "utl",
-	"version": "0.1.0",
-	"scripts": {
+    "name": "utl",
+    "version": "0.1.0",
+    "scripts": {
         "build:cli": "tsc --build && bun build ./dist/cli.js --compile --outfile ./bin/utl",
-		"start": "tsc --build && node ./dist/cli.js"
-	},
-	"devDependencies": {
-		"@types/follow-redirects": "^1.14.4",
-		"@types/node": "^24.10.1",
-		"@types/ws": "^8.18.1",
-		"follow-redirects": "^1.15.11",
-		"typescript": "^5.9.3"
-	},
-	"dependencies": {
-		"@brokerize/client": "^1.4.0",
-		"@inquirer/prompts": "^7.8.1",
-		"commander": "^14.0.2",
-		"date-prompt": "^1.0.0",
-		"open": "^8.4.0",
-		"rxjs": "^7.8.2",
-		"trapi": "github:NightOwl07/trade-republic-api",
-		"ws": "^8.19.0"
-	}
+        "start": "tsc --build && node ./dist/cli.js",
+        "format": "prettier --write . --config ~/.config/prettier/.prettierrc"
+    },
+    "devDependencies": {
+        "@types/follow-redirects": "^1.14.4",
+        "@types/node": "^24.10.1",
+        "@types/ws": "^8.18.1",
+        "follow-redirects": "^1.15.11",
+        "typescript": "^5.9.3"
+    },
+    "dependencies": {
+        "@brokerize/client": "^1.4.0",
+        "@inquirer/prompts": "^7.8.1",
+        "commander": "^14.0.2",
+        "date-prompt": "^1.0.0",
+        "open": "^8.4.0",
+        "rxjs": "^7.8.2",
+        "trapi": "github:NightOwl07/trade-republic-api",
+        "ws": "^8.19.0"
+    }
 }

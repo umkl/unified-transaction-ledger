@@ -1,1 +1,1 @@
-declare module "date-prompt";
+declare module 'date-prompt';

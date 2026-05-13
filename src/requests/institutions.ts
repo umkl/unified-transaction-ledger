@@ -1,14 +1,14 @@
-import https from "https";
-import { log } from "../lib/log";
+import https from 'https';
+import { log } from '../lib/log';
 
 const options: any = {
-    method: "GET",
-    hostname: "bankaccountdata.gocardless.com",
-    path: "/api/v2/institutions",
+    method: 'GET',
+    hostname: 'bankaccountdata.gocardless.com',
+    path: '/api/v2/institutions',
     port: 443,
     headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
     },
 };
 
@@ -19,16 +19,16 @@ export async function getInstitutions(accessToken: string, country: string) {
         const req = https.request(options, function (res) {
             const chunks: any = [];
 
-            res.on("data", function (chunk) {
+            res.on('data', function (chunk) {
                 chunks.push(chunk);
             });
 
-            res.on("end", function () {
+            res.on('end', function () {
                 try {
-                    const bodyData = Buffer.concat(chunks).toString("utf-8");
+                    const bodyData = Buffer.concat(chunks).toString('utf-8');
                     const json = JSON.parse(bodyData);
-                    log("Received token response:", json["status_code"]);
-                    if (json["status_code"] >= 400) {
+                    log('Received token response:', json['status_code']);
+                    if (json['status_code'] >= 400) {
                         reject(new Error(`Error response: ${bodyData}`));
                     }
                     resolve(json);
@@ -37,7 +37,7 @@ export async function getInstitutions(accessToken: string, country: string) {
                 }
             });
 
-            res.on("error", function (error) {
+            res.on('error', function (error) {
                 reject(error);
             });
         });

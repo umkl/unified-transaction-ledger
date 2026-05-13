@@ -1,4 +1,4 @@
 export enum TransactionType {
-    LIABILITY = "liability",
-    RECEIVABLE = "receivable",
+    LIABILITY = 'liability',
+    RECEIVABLE = 'receivable',
 }

@@ -1,10 +1,10 @@
-import { Brokerize, BrokerizeConfig } from "@brokerize/client";
+import { Brokerize, BrokerizeConfig } from '@brokerize/client';
 
 async function someBrokerizeActions() {
     const clientId = process.env.BROKERIZE_CLIENT_ID;
     if (!clientId) {
         throw new Error(
-            "Missing BROKERIZE_CLIENT_ID. Set env var to your Brokerize clientId.",
+            'Missing BROKERIZE_CLIENT_ID. Set env var to your Brokerize clientId.'
         );
     }
 
@@ -34,20 +34,20 @@ async function someBrokerizeActions() {
     /* with the guest user's token, create an authorized context.*/
     const ctx = brokerize.createAuthorizedContext(
         guestUserAuthContextConfiguration,
-        tokenRefreshCallback,
+        tokenRefreshCallback
     );
 
     /* do some API calls */
-    console.log("BROKERS", await ctx.getBrokers());
-    console.log("EXCHANGES", await ctx.getExchanges());
+    console.log('BROKERS', await ctx.getBrokers());
+    console.log('EXCHANGES', await ctx.getExchanges());
     const { id } = await ctx.createDemoAccount();
     const demoAccounts = await ctx.getDemoAccounts();
     const demoAccount = demoAccounts.accounts.find((x) => x.accountId == id);
 
     const session = await ctx.addSession({
-        brokerName: "DEMO",
-        env: "test",
-        password: "42",
+        brokerName: 'DEMO',
+        env: 'test',
+        password: '42',
         username: demoAccount!.accountName,
     });
 
@@ -55,14 +55,14 @@ async function someBrokerizeActions() {
     const client = ctx.createWebSocketClient();
     const s = client.subscribeDecoupledOperation(
         {
-            decoupledOperationId: "X",
-            sessionId: "XXXX",
+            decoupledOperationId: 'X',
+            sessionId: 'XXXX',
         },
         (err, data) => {
-            console.log("SUBSCR");
-        },
+            console.log('SUBSCR');
+        }
     );
     s.unsubscribe();
-    console.log("SESSION", session);
+    console.log('SESSION', session);
 }
 someBrokerizeActions().then(console.log, console.error);

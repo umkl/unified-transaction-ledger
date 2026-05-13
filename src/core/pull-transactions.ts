@@ -1,9 +1,9 @@
-import { checkbox, select } from "@inquirer/prompts";
-import { rl } from "../lib/readline-interface";
-import { Requisitions } from "../entities/Requisitions";
-import { Transactions } from "../entities/Transactions";
-import getSupportedInstitutions from "../const/supported";
-import { listAccounts } from "../requests/list-accounts";
+import { checkbox, select } from '@inquirer/prompts';
+import { rl } from '../lib/readline-interface';
+import { Requisitions } from '../entities/Requisitions';
+import { Transactions } from '../entities/Transactions';
+import getSupportedInstitutions from '../const/supported';
+import { listAccounts } from '../requests/list-accounts';
 
 export default async function pullAction() {
     const transactionsCacheDocument =
@@ -28,7 +28,7 @@ export async function pullTransactionsIntoCache(transactionsDoc: Transactions) {
     }));
 
     const checkedInstitutions = await checkbox({
-        message: "Select your institutions:",
+        message: 'Select your institutions:',
         choices: results,
         required: true,
     });
@@ -36,35 +36,35 @@ export async function pullTransactionsIntoCache(transactionsDoc: Transactions) {
     const requisitionsDocument = await Requisitions.create();
 
     for (const insti of checkedInstitutions) {
-        if (insti === "TRADE_REPUBLIC") {
-            console.log("fetching data from trade republic");
+        if (insti === 'TRADE_REPUBLIC') {
+            console.log('fetching data from trade republic');
             await transactionsDoc.fetchTransactionsFromTradeRepublic();
-        } else if (insti === "RAIFFEISEN_AT_RZBAATWW") {
+        } else if (insti === 'RAIFFEISEN_AT_RZBAATWW') {
             const reqId = await requisitionsDocument.getRequisitionId(insti);
             const accounts = await listAccounts(
-                process.env["GCL_ACCESS_TOKEN"],
-                reqId,
+                process.env['GCL_ACCESS_TOKEN'],
+                reqId
             );
             await transactionsDoc.fetchTransactionsRaiffeisen(
                 insti,
-                accounts[0],
+                accounts[0]
             );
-        } else if (insti === "REVOLUT_REVOLT21") {
+        } else if (insti === 'REVOLUT_REVOLT21') {
             const reqId = await requisitionsDocument.getRequisitionId(insti);
             const accounts = await listAccounts(
-                process.env["GCL_ACCESS_TOKEN"],
-                reqId,
+                process.env['GCL_ACCESS_TOKEN'],
+                reqId
             );
             await transactionsDoc.fetchTransactionsRevolut(insti, accounts[0]);
-        } else if (insti === "N26_NTSBDEB1") {
+        } else if (insti === 'N26_NTSBDEB1') {
             const reqId = await requisitionsDocument.getRequisitionId(insti);
             const accounts = await listAccounts(
-                process.env["GCL_ACCESS_TOKEN"],
-                reqId,
+                process.env['GCL_ACCESS_TOKEN'],
+                reqId
             );
             await transactionsDoc.fetchTransactionsN26(insti, accounts[0]);
         } else {
-            console.error("Institution not supported yet: " + insti);
+            console.error('Institution not supported yet: ' + insti);
         }
     }
 
