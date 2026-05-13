@@ -96,11 +96,17 @@ export class Transactions {
         const lines = [columns.join(',')];
         for (const tx of transactions) {
             const row = columns
-                .map((key) => escapeCSV(tx[key as keyof Transaction]))
-                .map(() => {
-                    return tx.institution
-                        ? escapeCSV(tx.institution?.name)
-                        : '';
+                .map((key) => {
+                    if (key === 'institution') {
+                        return escapeCSV(
+                            tx.institution?.name ??
+                                (tx as Transaction & { institutionId?: string })
+                                    .institutionId ??
+                                ''
+                        );
+                    }
+
+                    return escapeCSV(tx[key as keyof Transaction]);
                 })
                 .join(',');
             lines.push(row);
