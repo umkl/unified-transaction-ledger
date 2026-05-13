@@ -5,7 +5,7 @@ import { input } from '@inquirer/prompts';
 const fs = require('fs').promises;
 const path = require('path');
 
-export default async function spreadsheetAction() {
+export default async function exportSpreadsheet() {
     const transactionFile = await Transactions.init();
 
     log('Create Spreadsheet with the Data');
