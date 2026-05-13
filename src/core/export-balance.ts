@@ -46,7 +46,7 @@ export default async function balanceExportAction() {
         lines.push(row.join(','));
     }
 
-    const csvWithBOM = '\ufeff' + lines.join('\n');
+    const csvWithBOM = 'SEP=,\r\n' + lines.join('\r\n');
     const outputPath = path.join(process.cwd(), 'balances.csv');
     await fs.writeFile(outputPath, csvWithBOM, 'utf-8');
     log(`Balances written to ${outputPath}`);

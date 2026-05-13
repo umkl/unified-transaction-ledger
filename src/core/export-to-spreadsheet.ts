@@ -39,9 +39,9 @@ export default async function exportSpreadsheet() {
 
     const transactions = transactionFile.getTransactions(year, month);
 
-    const csv = transactionFile.toCSVLines(transactions).join('\n');
+    const csv = transactionFile.toCSVLines(transactions).join('\r\n');
 
-    const csvWithBOM = '\ufeff' + csv;
+    const csvWithBOM = 'SEP=,\r\n' + csv;
 
     const outputPath = path.join(process.cwd(), 'transactions.csv');
     await fs.writeFile(outputPath, csvWithBOM, 'utf-8');

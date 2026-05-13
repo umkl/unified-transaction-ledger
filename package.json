@@ -2,8 +2,8 @@
     "name": "utl",
     "version": "0.1.0",
     "scripts": {
-        "build:cli": "tsc --build && bun build ./dist/cli.js --compile --outfile ./bin/utl",
-        "start": "tsc --build && node ./dist/cli.js",
+        "build:cli": "tsc --build && bun build ./dist/main.js --compile --outfile ./bin/utl",
+        "start": "tsc --build && node ./dist/main.js",
         "format": "prettier --write . --config ~/.config/prettier/.prettierrc"
     },
     "devDependencies": {
