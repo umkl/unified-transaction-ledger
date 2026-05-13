@@ -111,8 +111,16 @@ async function fetchAllTransactionsViaTrapi(
 ) {
     const allData: any[] = [];
     let afterCursor: string | undefined;
+    let page = 0;
+
+    console.log('[trapi] fetchAllTransactionsViaTrapi:start');
 
     while (true) {
+        page += 1;
+        console.log(
+            `[trapi] fetchAllTransactionsViaTrapi:timeline page=${page} after=${afterCursor ?? 'start'}`
+        );
+
         const timelineMessage = afterCursor
             ? createMessage('timelineTransactions', {
                   after: afterCursor,
@@ -132,7 +140,14 @@ async function fetchAllTransactionsViaTrapi(
             ? timelineData.items
             : [];
 
+        console.log(
+            `[trapi] fetchAllTransactionsViaTrapi:timeline page=${page} items=${items.length}`
+        );
+
         if (items.length === 0) {
+            console.log(
+                `[trapi] fetchAllTransactionsViaTrapi:done page=${page} reason=empty-items total=${allData.length}`
+            );
             break;
         }
 
@@ -142,9 +157,15 @@ async function fetchAllTransactionsViaTrapi(
                 typeof tx?.status === 'string' &&
                 tx.status.includes('CANCELED')
             ) {
+                console.warn(
+                    `[trapi] fetchAllTransactionsViaTrapi:skip-canceled id=${txId ?? 'unknown'}`
+                );
                 continue;
             }
             if (txId) {
+                console.log(
+                    `[trapi] fetchAllTransactionsViaTrapi:detail id=${txId}`
+                );
                 const details = await subscribeOnceJson<any>(
                     api,
                     createMessage('timelineDetailV2', {
@@ -152,20 +173,37 @@ async function fetchAllTransactionsViaTrapi(
                     } as any) as any
                 );
                 Object.assign(tx, extractTransactionDetails(details));
+            } else {
+                console.warn(
+                    '[trapi] fetchAllTransactionsViaTrapi:missing-id detail-skip'
+                );
             }
             allData.push(tx);
         }
 
         afterCursor = timelineData?.cursors?.after;
         if (!afterCursor) {
+            console.log(
+                `[trapi] fetchAllTransactionsViaTrapi:done page=${page} reason=no-cursor total=${allData.length}`
+            );
             break;
         }
+
+        console.log(
+            `[trapi] fetchAllTransactionsViaTrapi:next page=${page} nextAfter=${afterCursor} total=${allData.length}`
+        );
     }
+
+    console.log(
+        `[trapi] fetchAllTransactionsViaTrapi:complete total=${allData.length} pages=${page}`
+    );
 
     return allData;
 }
 
-export default async function retrieveTransactionsFromTradeRepublic() {
+export default async function retrieveTransactionsFromTradeRepublic(): Promise<
+    any[]
+> {
     const config = await readConfig();
     let phone = process.env.TR_PHONE ?? config.TR_PHONE;
 

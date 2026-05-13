@@ -201,8 +201,9 @@ export default async function balanceAction() {
                     balances.push(demoBalance(bankId));
                     continue;
                 }
-                const reqId =
-                    await requisitionsDocument.getRequisitionId(insti);
+                const reqId = await requisitionsDocument.getRequisitionId(
+                    insti as any
+                );
                 const accounts = await listAccounts(accessToken, reqId);
                 const accountId = accounts?.[0];
                 if (!accountId) {

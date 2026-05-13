@@ -6,8 +6,7 @@ const fs = require('fs').promises;
 const path = require('path');
 
 export default async function spreadsheetAction() {
-    const transactionFile =
-        await Transactions.createUsingPotentiallyExisitingTransactions();
+    const transactionFile = await Transactions.init();
 
     log('Create Spreadsheet with the Data');
     const yearInput = await input({

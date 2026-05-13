@@ -37,8 +37,7 @@ export default async function cashAction() {
         recipient: recipient,
     } as any;
 
-    const transactionFile =
-        await Transactions.createUsingPotentiallyExisitingTransactions();
+    const transactionFile = await Transactions.init();
     transactionFile.addTransaction(transaction);
     transactionFile.writeToJsonFile();
 }

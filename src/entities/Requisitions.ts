@@ -7,6 +7,7 @@ import path from 'node:path';
 
 import { log } from '../lib/log';
 import { getConfigPath } from '../lib/config';
+import { InstitutionId } from '../const/enums';
 
 export class Requisitions {
     private requisitions = new Map<string, any>();
@@ -32,7 +33,7 @@ export class Requisitions {
         }
     }
 
-    async getRequisitionId(insti: string) {
+    async getRequisitionId(insti: InstitutionId) {
         if (this.requisitions.has(insti)) {
             console.log(`Requisition for institution ${insti} found in cache.`);
 

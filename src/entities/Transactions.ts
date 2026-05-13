@@ -1,24 +1,22 @@
 import fs from 'fs/promises';
-import { listTransactionsRequest } from '../requests/account-transactions';
 import { log } from '../lib/log';
-import { confirm } from '@inquirer/prompts';
 import path from 'path';
 
 import { fileExists } from '../lib/file-exists';
-import { toSnakeCase } from '../lib/snake-case';
-import retrieveTransactionsFromTradeRepublic from '../repo/trade-republic';
-import getSupportedInstitutions from '../const/supported';
-import { TransactionType } from '../const/enums';
+import { InstitutionId, TransactionType } from '../const/enums';
 import { getConfigPath } from '../lib/config';
+import { retrieveTradeRepublicTransactions } from '../core/retrieve-trade-republic-transactions';
+import { fetchGoCardless } from '../core/retrieve-go-cardless-transactions';
+import { listAccounts } from '../requests/list-accounts';
+import { Requisitions } from './Requisitions';
 
 export class Transactions {
     private transactions: Transaction[] = [];
     private constructor(transactions: Transaction[] = []) {
-        console.log('Initial Transactions: ', transactions.length);
+        log('Current Transactions: ', transactions.length.toFixed(0));
         this.transactions = transactions;
     }
-    public static async createUsingPotentiallyExisitingTransactions() {
-        // reads from the json file
+    public static async init() {
         const readTransactions: Transaction[] = [];
         const configDir = path.dirname(getConfigPath());
         const filePath = path.join(configDir, 'transactions.json');
@@ -73,14 +71,14 @@ export class Transactions {
     public toCSVLines(
         transactions: Transaction[] = this.transactions
     ): string[] {
-        const columns: (keyof Transaction)[] = [
+        const columns = [
             'id',
             'amount',
             'type',
             'date',
             'description',
             'recipient',
-            'institutionId',
+            'institution',
         ];
 
         const escapeCSV = (value: unknown): string => {
@@ -97,7 +95,14 @@ export class Transactions {
 
         const lines = [columns.join(',')];
         for (const tx of transactions) {
-            const row = columns.map((key) => escapeCSV(tx[key])).join(',');
+            const row = columns
+                .map((key) => escapeCSV(tx[key as keyof Transaction]))
+                .map(() => {
+                    return tx.institution
+                        ? escapeCSV(tx.institution?.name)
+                        : '';
+                })
+                .join(',');
             lines.push(row);
         }
 
@@ -122,422 +127,42 @@ export class Transactions {
         log(`Persisted Transactions: ${this.transactions.length}`);
     }
 
-    public async fetchTransactionsForInstitution(
-        institutionId: string,
-        accountId: string
-    ): Promise<void> {
-        const cacheDir = path.dirname(getConfigPath());
-        const prefix = `response-${accountId}-${institutionId}-`;
-
-        let data: any;
-        try {
-            const files = await fs.readdir(cacheDir);
-            const matchingFiles = files.filter(
-                (f) => f.startsWith(prefix) && f.endsWith('.json')
-            );
-            if (matchingFiles.length === 0) {
-                throw new Error('No cached response files found');
-            }
-            matchingFiles.sort((a, b) => {
-                const dateA = a.slice(prefix.length, prefix.length + 10);
-                const dateB = b.slice(prefix.length, prefix.length + 10);
-                return dateA.localeCompare(dateB);
-            });
-
-            const latestFile = matchingFiles[matchingFiles.length - 1];
-            const cachePath = path.join(cacheDir, latestFile);
-
-            data = await fs.readFile(cachePath, 'utf8');
-
-            const fetchRegardless = await confirm({
-                message:
-                    'There is a cached response - do you want to create a new fetch (only 4 per day)?',
-            });
-            if (fetchRegardless) {
-                throw new Error('Fetching regardless of cache');
-            }
-        } catch (err: Error | any) {
-            log('Proceeding to fetch from API...');
-            data = await listTransactionsRequest(
-                process.env['GCL_ACCESS_TOKEN'],
-                accountId,
-                institutionId
-            );
-        }
-        // For debugging purposes only:
-        // const data = await fs.readFile(
-        //   process.cwd() + `/cache/response-${institutionId}.json`,
-        //   { encoding: "utf-8" }
-        // );
-        const transactions = data;
-        const booked = transactions.transactions.booked;
-        const transactionsMapped = booked.map((tx: any): Transaction => {
-            return {
-                id: tx.transactionId,
-                amount: tx.transactionAmount.amount,
-                date: tx.bookingDate,
-                description: tx.creditorName,
-                recipient: tx.creditorName,
-                institutionId: institutionId,
-            } as any;
-        });
-
-        for (const tx of transactionsMapped as any[]) {
-            this.addTransaction(tx);
-        }
-    }
-
-    public async fetchTransactionsRaiffeisen(
-        institutionId: string = 'RAIFFEISEN_AT_RZBAATWW',
-        accountId: string
-    ): Promise<void> {
-        const supported = await getSupportedInstitutions();
-        const institution = supported.find((x) => x.id === institutionId);
-        if (!institution) {
-            throw new Error("Institution wasn't found");
-        }
-
-        const cacheDir = path.dirname(getConfigPath());
-        const prefix = `response-${institutionId}`;
-
-        let data: any;
-        try {
-            const files = await fs.readdir(cacheDir);
-            const matchingFiles = files.filter(
-                (f) => f.startsWith(prefix) && f.endsWith('.json')
-            );
-            if (matchingFiles.length === 0) {
-                throw new Error('No cached response files found');
-            }
-            matchingFiles.sort((a, b) => {
-                const dateA = a.slice(prefix.length, prefix.length + 10);
-                const dateB = b.slice(prefix.length, prefix.length + 10);
-                return dateA.localeCompare(dateB);
-            });
-
-            const latestFile = matchingFiles[matchingFiles.length - 1];
-            const cachePath = path.join(cacheDir, latestFile);
-
-            const fetchRegardless = await confirm({
-                message:
-                    'There is a cached response - do you want to create a new fetch (only 4 per day)?',
-            });
-            if (fetchRegardless) {
-                throw new Error('Fetching regardless of cache');
-            }
-
-            console.log(cachePath);
-            data = JSON.parse(await fs.readFile(cachePath, 'utf8'));
-        } catch (err: Error | any) {
-            log('Proceeding to fetch from API...');
-            // For debugging purposes only:
-            // const result = await fs.readFile(
-            //   process.cwd() +
-            //     `/cache/response-1b686203-f5b6-4198-b983-0b7e9bbd4085-RAIFFEISEN_AT_RZBAATWW-2026-02-09.json`,
-            //   { encoding: "utf-8" },
-            // );
-
-            // data = JSON.parse(result);
-
-            data = await listTransactionsRequest(
-                process.env['GCL_ACCESS_TOKEN'],
-                accountId,
-                institutionId
-            );
-        }
-        // pending would also be available, but for this scenario only booked ones are being used
-
-        const transactions = data.transactions.booked;
-
-        const transactionsMapped: Transaction[] = transactions?.map(
-            (tx: any): Transaction => {
-                const amount = +tx.transactionAmount.amount;
-                const isNegative = amount < 0;
-
-                return {
-                    id: tx.transactionId,
-                    amount: tx.transactionAmount.amount,
-                    date: new Date(tx.bookingDate),
-                    description: tx.title,
-                    type: isNegative
-                        ? TransactionType.LIABILITY
-                        : TransactionType.RECEIVABLE,
-                    recipient: tx.title,
-                    institution: institution,
-                    institutionId: institution.id,
-                };
-            }
-        );
-
-        for (const newTransaction of transactionsMapped) {
-            const existingTransactionWithSameId = this.transactions.find(
-                (existingTransaction) => {
-                    return existingTransaction.id === newTransaction.id;
-                }
-            );
-            if (existingTransactionWithSameId === undefined) {
-                this.addTransaction(newTransaction);
-            }
-        }
-    }
-
-    async fetchTransactionsRevolut(
-        institutionId: string = 'REVOLUT_REVOLT21',
-        accountId: string
+    public async pull(
+        institution: InstitutionId,
+        requisitionsDocument?: Requisitions
     ) {
-        const supported = await getSupportedInstitutions();
-        const institution = supported.find((x) => x.id === institutionId);
-        if (!institution) {
-            throw new Error("Institution wasn't found");
+        let transactions;
+        switch (institution) {
+            case InstitutionId.TRADE_REPUBLIC:
+                transactions = await retrieveTradeRepublicTransactions();
+                console.log(
+                    'Fetched transactions from Trade Republic:',
+                    transactions.length
+                );
+                break;
+            case InstitutionId.RAIFFEISEN_AT_RZBAATWW:
+            case InstitutionId.REVOLUT_REVOLT21:
+            case InstitutionId.N26_NTSBDEB1:
+                const reqId =
+                    await requisitionsDocument?.getRequisitionId(institution);
+                const accounts = await listAccounts(
+                    process.env['GCL_ACCESS_TOKEN'],
+                    reqId || ''
+                );
+                transactions = await fetchGoCardless(institution, accounts[0]);
+
+            default:
+                break;
         }
 
-        const cacheDir = path.dirname(getConfigPath());
-        const prefix = `response-${institutionId}`;
-
-        let data: any;
-        try {
-            const files = await fs.readdir(cacheDir);
-            const matchingFiles = files.filter(
-                (f) => f.startsWith(prefix) && f.endsWith('.json')
-            );
-            if (matchingFiles.length === 0) {
-                throw new Error('No cached response files found');
-            }
-            matchingFiles.sort((a, b) => {
-                const dateA = a.slice(prefix.length, prefix.length + 10);
-                const dateB = b.slice(prefix.length, prefix.length + 10);
-                return dateA.localeCompare(dateB);
-            });
-
-            const latestFile = matchingFiles[matchingFiles.length - 1];
-            const cachePath = path.join(cacheDir, latestFile);
-
-            const fetchRegardless = await confirm({
-                message:
-                    'There is a cached response - do you want to create a new fetch (only 4 per day)?',
-            });
-            if (fetchRegardless) {
-                throw new Error('Fetching regardless of cache');
-            }
-
-            console.log(cachePath);
-            data = JSON.parse(await fs.readFile(cachePath, 'utf8'));
-        } catch (err: Error | any) {
-            log('Proceeding to fetch from API...');
-            // For debugging purposes only:
-            // const result = await fs.readFile(
-            //   process.cwd() +
-            //     `/cache/response-1b686203-f5b6-4198-b983-0b7e9bbd4085-RAIFFEISEN_AT_RZBAATWW-2026-02-09.json`,
-            //   { encoding: "utf-8" },
-            // );
-
-            // data = JSON.parse(result);
-
-            data = await listTransactionsRequest(
-                process.env['GCL_ACCESS_TOKEN'],
-                accountId,
-                institutionId
-            );
-        }
-        // pending would also be available, but for this scenario only booked ones are being used
-
-        const transactions = data.transactions.booked;
-
-        const transactionsMapped: Transaction[] = transactions?.map(
-            (tx: any): Transaction => {
-                const amount = +tx.transactionAmount.amount;
-                const isNegative = amount < 0;
-
-                return {
-                    id: tx.transactionId,
-                    amount: tx.transactionAmount.amount,
-                    date: new Date(tx.bookingDateTime),
-                    description: tx.creditorName,
-                    type: isNegative
-                        ? TransactionType.LIABILITY
-                        : TransactionType.RECEIVABLE,
-                    recipient: tx.title,
-                    institution: institution,
-                    institutionId: institution.id,
-                };
-            }
-        );
-
-        for (const newTransaction of transactionsMapped) {
-            const existingTransactionWithSameId = this.transactions.find(
-                (existingTransaction) => {
-                    return existingTransaction.id === newTransaction.id;
-                }
-            );
-            if (existingTransactionWithSameId === undefined) {
-                this.addTransaction(newTransaction);
-            }
-        }
-    }
-
-    async fetchTransactionsN26(
-        institutionId: string = 'N26_NTSBDEB1',
-        accountId: string
-    ) {
-        const supported = await getSupportedInstitutions();
-        const institution = supported.find((x) => x.id === institutionId);
-        if (!institution) {
-            throw new Error("Institution wasn't found");
-        }
-
-        const cacheDir = path.dirname(getConfigPath());
-        const prefix = `response-${institutionId}`;
-
-        let data: any;
-        try {
-            const files = await fs.readdir(cacheDir);
-            const matchingFiles = files.filter(
-                (f) => f.startsWith(prefix) && f.endsWith('.json')
-            );
-            if (matchingFiles.length === 0) {
-                throw new Error('No cached response files found');
-            }
-            matchingFiles.sort((a, b) => {
-                const dateA = a.slice(prefix.length, prefix.length + 10);
-                const dateB = b.slice(prefix.length, prefix.length + 10);
-                return dateA.localeCompare(dateB);
-            });
-
-            const latestFile = matchingFiles[matchingFiles.length - 1];
-            const cachePath = path.join(cacheDir, latestFile);
-
-            const fetchRegardless = await confirm({
-                message:
-                    'There is a cached response - do you want to create a new fetch (only 4 per day)?',
-            });
-            if (fetchRegardless) {
-                throw new Error('Fetching regardless of cache');
-            }
-
-            console.log(cachePath);
-            data = JSON.parse(await fs.readFile(cachePath, 'utf8'));
-        } catch (err: Error | any) {
-            log('Proceeding to fetch from API...');
-            data = await listTransactionsRequest(
-                process.env['GCL_ACCESS_TOKEN'],
-                accountId,
-                institutionId
-            );
-        }
-
-        const transactions = data.transactions.booked;
-
-        const transactionsMapped: Transaction[] = transactions?.map(
-            (tx: any): Transaction => {
-                const amount = +tx.transactionAmount.amount;
-                const isNegative = amount < 0;
-                const description =
-                    tx.creditorName ??
-                    tx.debtorName ??
-                    tx.remittanceInformationUnstructured ??
-                    tx.additionalInformation ??
-                    tx.title ??
-                    tx.transactionId;
-
-                return {
-                    id: tx.transactionId,
-                    amount: tx.transactionAmount.amount,
-                    date: new Date(tx.bookingDateTime ?? tx.bookingDate),
-                    description,
-                    type: isNegative
-                        ? TransactionType.LIABILITY
-                        : TransactionType.RECEIVABLE,
-                    recipient: tx.creditorName ?? tx.debtorName ?? description,
-                    institution: institution,
-                    institutionId: institution.id,
-                };
-            }
-        );
-
-        for (const newTransaction of transactionsMapped) {
-            const existingTransactionWithSameId = this.transactions.find(
-                (existingTransaction) => {
-                    return existingTransaction.id === newTransaction.id;
-                }
-            );
-            if (existingTransactionWithSameId === undefined) {
-                this.addTransaction(newTransaction);
-            }
-        }
-    }
-
-    public async fetchTransactionsFromTradeRepublic(
-        institutionId: string = 'TRADE_REPUBLIC'
-    ) {
-        const supported = await getSupportedInstitutions();
-        const institution = supported.find((x) => x.id === institutionId);
-        if (!institution) {
-            throw new Error("Institution wasn't found");
-        }
-
-        const cacheDir = path.dirname(getConfigPath());
-
-        const prefix = `response-tr-`;
-
-        let transactions: any;
-        const files = await fs.readdir(cacheDir);
-        const matchingFiles = files.filter(
-            (f) => f.startsWith(prefix) && f.endsWith('.json')
-        );
-        console.log('matching files');
-        console.log(matchingFiles);
-        if (matchingFiles.length !== 0) {
-            matchingFiles.sort((a, b) => {
-                const dateA = a.slice(prefix.length, prefix.length + 10);
-                const dateB = b.slice(prefix.length, prefix.length + 10);
-                return dateA.localeCompare(dateB);
-            });
-            const latestFile = matchingFiles[matchingFiles.length - 1];
-            const cachePath = path.join(cacheDir, latestFile);
-            const data = await fs.readFile(cachePath, 'utf8');
-
-            const fetchRegardless = await confirm({
-                message:
-                    'There is a cached response - do you want to create a new fetch?',
-            });
-
-            if (fetchRegardless) {
-                transactions = await retrieveTransactionsFromTradeRepublic();
-            } else {
-                transactions = JSON.parse(data);
-            }
-        } else {
-            transactions = await retrieveTransactionsFromTradeRepublic();
-        }
-
-        const transactionsMapped: Transaction[] = transactions?.map(
-            (tx: any): Transaction => {
-                const amount = +tx.amount.value;
-                const isNegative = amount < 0;
-
-                return {
-                    id: tx.id,
-                    amount: tx.amount.value,
-                    type: isNegative
-                        ? TransactionType.LIABILITY
-                        : TransactionType.RECEIVABLE,
-                    date: tx.timestamp,
-                    description: tx.title,
-                    recipient: tx.title,
-                    institution: institution,
-                    institutionId: institutionId,
-                };
-            }
-        );
-
-        for (const newTransaction of transactionsMapped) {
-            const existingTransactionWithSameId = this.transactions.find(
-                (existingTransaction) => {
-                    return existingTransaction.id === newTransaction.id;
-                }
-            );
-            if (existingTransactionWithSameId === undefined) {
-                this.addTransaction(newTransaction);
+        if (!transactions) return;
+        for (const transaction of transactions) {
+            if (
+                this.transactions.find((existingTransaction) => {
+                    return existingTransaction.id === transaction.id;
+                }) === undefined
+            ) {
+                this.addTransaction(transaction);
             }
         }
     }

@@ -5,6 +5,5 @@ type Transaction = {
     date: Date;
     description: string;
     recipient: string;
-    institutionId: string;
     institution?: Institution;
 };

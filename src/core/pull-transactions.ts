@@ -4,69 +4,38 @@ import { Requisitions } from '../entities/Requisitions';
 import { Transactions } from '../entities/Transactions';
 import getSupportedInstitutions from '../const/supported';
 import { listAccounts } from '../requests/list-accounts';
+import { InstitutionId } from '../const/enums';
 
-export default async function pullAction() {
-    const transactionsCacheDocument =
-        await Transactions.createUsingPotentiallyExisitingTransactions();
+export default async function pullTransactions() {
+    const transactionsCacheDocument = await Transactions.init();
 
     await pullTransactionsIntoCache(transactionsCacheDocument);
-
     await transactionsCacheDocument.writeToJsonFile();
 
     rl.close();
 }
 
 export async function pullTransactionsIntoCache(transactionsDoc: Transactions) {
-    // const countryCode = await promptCountry();
+    const requisitionsDocument = await Requisitions.create();
 
-    const institutions = await getSupportedInstitutions();
+    const institutionsSupported = await getSupportedInstitutions();
 
-    const results = institutions.map((inst) => ({
-        name: inst.name,
-        value: inst.id,
-        checked: false,
-    }));
-
-    const checkedInstitutions = await checkbox({
+    const institutionsChecked = await checkbox({
         message: 'Select your institutions:',
-        choices: results,
+        choices: institutionsSupported.map((inst) => ({
+            name: inst.name,
+            value: inst.id,
+            checked: false,
+        })),
         required: true,
     });
 
-    const requisitionsDocument = await Requisitions.create();
-
-    for (const insti of checkedInstitutions) {
-        if (insti === 'TRADE_REPUBLIC') {
-            console.log('fetching data from trade republic');
-            await transactionsDoc.fetchTransactionsFromTradeRepublic();
-        } else if (insti === 'RAIFFEISEN_AT_RZBAATWW') {
-            const reqId = await requisitionsDocument.getRequisitionId(insti);
-            const accounts = await listAccounts(
-                process.env['GCL_ACCESS_TOKEN'],
-                reqId
-            );
-            await transactionsDoc.fetchTransactionsRaiffeisen(
-                insti,
-                accounts[0]
-            );
-        } else if (insti === 'REVOLUT_REVOLT21') {
-            const reqId = await requisitionsDocument.getRequisitionId(insti);
-            const accounts = await listAccounts(
-                process.env['GCL_ACCESS_TOKEN'],
-                reqId
-            );
-            await transactionsDoc.fetchTransactionsRevolut(insti, accounts[0]);
-        } else if (insti === 'N26_NTSBDEB1') {
-            const reqId = await requisitionsDocument.getRequisitionId(insti);
-            const accounts = await listAccounts(
-                process.env['GCL_ACCESS_TOKEN'],
-                reqId
-            );
-            await transactionsDoc.fetchTransactionsN26(insti, accounts[0]);
-        } else {
-            console.error('Institution not supported yet: ' + insti);
-        }
+    for (const institutionValue of institutionsChecked) {
+        await transactionsDoc.pull(
+            institutionValue as InstitutionId,
+            requisitionsDocument
+        );
     }
 
-    (await requisitionsDocument).persist();
+    requisitionsDocument.persist();
 }
