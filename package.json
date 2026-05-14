@@ -2,7 +2,7 @@
     "name": "utl",
     "version": "0.1.0",
     "scripts": {
-        "build:cli": "tsc --build && bun build ./dist/main.js --compile --outfile ./bin/utl",
+        "build:cli": "tsc --build && sudo bun build ./dist/main.js --compile --outfile /usr/local/bin/utl",
         "start": "tsc --build && node ./dist/main.js",
         "format": "prettier --write . --config ~/.config/prettier/.prettierrc"
     },
